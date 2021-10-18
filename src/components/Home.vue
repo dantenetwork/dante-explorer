@@ -39,6 +39,7 @@
       :headers="headers"
       :items="deals"
       class="elevation-1"
+      @click:row="handleClick"
     ></v-data-table>
   </v-container>
 </template>
@@ -105,12 +106,10 @@ export default {
       },
     ],
   }),
+  methods: {
+    handleClick(value) {
+      console.log(value);
+    },
+  },
 };
 </script>
-
-
-<style>
-.card-gap {
-  margin: 20px;
-}
-</style>
