@@ -1,5 +1,6 @@
 <template>
   <v-container>
+    <br />
     <v-card class="d-inline-flex ma-5" max-width="200">
       <v-card-text>
         <p class="text-h5 text--primary">654,109,876</p>
@@ -34,13 +35,22 @@
         <div class="text--primary">上一周期未领取奖励</div>
       </v-card-text>
     </v-card>
+    <br /><br /><br /><br />
+    <v-toolbar-title>订单列表</v-toolbar-title>
+    <br />
 
     <v-data-table
       :headers="headers"
       :items="deals"
+      :page.sync="page"
+      hide-default-footer
       class="elevation-1"
       @click:row="handleClick"
+      @page-count="pageCount = $event"
     ></v-data-table>
+    <div class="text-center pt-2">
+      <v-pagination v-model="page" :length="pageCount"></v-pagination>
+    </div>
   </v-container>
 </template>
 
@@ -49,6 +59,8 @@
 export default {
   name: "Home",
   data: () => ({
+    page: 1,
+    pageCount: 1,
     headers: [
       {
         text: "订单 ID",
@@ -108,6 +120,7 @@ export default {
   }),
   methods: {
     handleClick(deal) {
+      // navigate to deal info pages
       this.$router.push({ name: "deal", params: { dealId: deal.cid } });
     },
   },

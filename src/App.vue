@@ -19,3 +19,9 @@ export default {
   name: "App",
 };
 </script>
+
+<style>
+.text-start:hover {
+  cursor: pointer;
+}
+</style>
