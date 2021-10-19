@@ -107,8 +107,8 @@ export default {
     ],
   }),
   methods: {
-    handleClick(value) {
-      console.log(value);
+    handleClick(deal) {
+      this.$router.push({ name: "deal", params: { dealId: deal.cid } });
     },
   },
 };
