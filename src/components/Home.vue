@@ -66,10 +66,12 @@
 
 
 <script>
+const UNIT = 1000000000000000000;
+
 export default {
   name: "Home",
   created() {
-    const UNIT = 1000000000000000000;
+    // get mining info
     this.$http.get("http://127.0.0.1:8081/mining").then(
       function (res) {
         if (res.status == 200) {
@@ -80,7 +82,7 @@ export default {
           const prePeriodTotalTaskReward = (res.body[6] / UNIT).toFixed(0);
           const prePeriodTotalIdleReward = (res.body[5] / UNIT).toFixed(0);
 
-          // formate reward & capcacity
+          // format reward & capcacity
           let mining = {
             prePeriodTotalReward:
               Number(prePeriodTotalReward).toLocaleString() + " DAT",
@@ -91,6 +93,29 @@ export default {
             prePeriodTotalIdleReward: Number(prePeriodTotalIdleReward) + " DAT",
           };
           this.mining = mining;
+        }
+      },
+      function (error) {
+        console.log(error);
+      }
+    );
+
+    // get opened deal
+    this.$http.get("http://127.0.0.1:8081/deal").then(
+      function (res) {
+        console.log(res);
+        if (res.status == 200) {
+          this.deals = res.body;
+          // format deals info
+          for (let i = 0; i < this.deals.length; i++) {
+            this.deals[i].state = ["等待接单", "已接满", "已到期", "非法订单"][
+              this.deals[i].state
+            ];
+            this.deals[i].totalReward =
+              this.deals[i].totalReward / UNIT + " DAT";
+            this.deals[i].rewardBalance =
+              this.deals[i].rewardBalance / UNIT + " DAT";
+          }
         }
       },
       function (error) {
@@ -110,54 +135,11 @@ export default {
         value: "cid",
       },
       { text: "订单状态", value: "state" },
-      { text: "订单总奖励", value: "total_reward" },
-      { text: "订单剩余奖励", value: "reward_balance" },
+      { text: "订单总奖励", value: "totalReward" },
+      { text: "订单剩余奖励", value: "rewardBalance" },
       { text: "发起人", value: "sender" },
     ],
-    deals: [
-      {
-        cid: "bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdb",
-        state: 2,
-        sender: "lat15nqll7dfn4km00lz6nd4ahxya5gals9d2f7sn8",
-        total_reward: 3000000,
-        reward_balance: 3000000,
-      },
-      {
-        cid: "bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdb",
-        state: 2,
-        sender: "lat15nqll7dfn4km00lz6nd4ahxya5gals9d2f7sn8",
-        total_reward: 3000000,
-        reward_balance: 3000000,
-      },
-      {
-        cid: "bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdb",
-        state: 2,
-        sender: "lat15nqll7dfn4km00lz6nd4ahxya5gals9d2f7sn8",
-        total_reward: 3000000,
-        reward_balance: 3000000,
-      },
-      {
-        cid: "bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdb",
-        state: 2,
-        sender: "lat15nqll7dfn4km00lz6nd4ahxya5gals9d2f7sn8",
-        total_reward: 3000000,
-        reward_balance: 3000000,
-      },
-      {
-        cid: "bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdb",
-        state: 2,
-        sender: "lat15nqll7dfn4km00lz6nd4ahxya5gals9d2f7sn8",
-        total_reward: 3000000,
-        reward_balance: 3000000,
-      },
-      {
-        cid: "bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdb",
-        state: 2,
-        sender: "lat15nqll7dfn4km00lz6nd4ahxya5gals9d2f7sn8",
-        total_reward: 3000000,
-        reward_balance: 3000000,
-      },
-    ],
+    deals: [],
   }),
   methods: {
     handleClick(deal) {

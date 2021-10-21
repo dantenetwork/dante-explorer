@@ -31,65 +31,12 @@
 
 
 <script>
+const UNIT = 1000000000000000000;
+
 export default {
   name: "Provider",
   data: () => ({
-    providerInfo: [
-      {
-        name: "名称",
-        value: "Google",
-      },
-      {
-        name: "IPFS Peer Id",
-        value: "lat1fs9m6p59antawy7u2g5kx4xkaup78m0m2pu27y",
-      },
-      {
-        name: "所在地区",
-        value: "072",
-      },
-      {
-        name: "待领取奖励",
-        value: "10000",
-      },
-      {
-        name: "SGX 公钥",
-        value:
-          "0474c4ecda8d528a5adf2810b27c174be17c86e263a0998f380a42f4a2eb350fc54fb341146a6305ba436bc933402f9868d01338acc7abd81854c28b14781b78a1",
-      },
-      {
-        name: "接收奖励地址",
-        value: "lat1fs9m6p59antawy7u2g5kx4xkaup78m0m2pu27y",
-      },
-      {
-        name: "区块链账号",
-        value: "lat1fs9m6p59antawy7u2g5kx4xkaup78m0m2pu27y",
-      },
-      {
-        name: "抵押数量",
-        value: "1000000 DAT",
-      },
-      {
-        name: "任务空间大小",
-        value: 0,
-      },
-      {
-        name: "空闲空间大小",
-        value: 0,
-      },
-      {
-        name: "上传区块号",
-        value: 0,
-      },
-      {
-        name: "存储证明签名",
-        value:
-          "0x6218ff2883e9ee97e29da6a3d6fe0f59081c2de9143b8dee336059c67fc249d965dbc3e5f6d3f0ae598d6be97c39a7a204d0636e50b0d56677eec7d84267c92801",
-      },
-      {
-        name: "时间戳",
-        value: 0,
-      },
-    ],
+    providerInfo: [],
     headers: [
       {
         text: "投票人地址",
@@ -100,21 +47,121 @@ export default {
       { text: "DAT 数量", value: "amount" },
       { text: "区块号", value: "block_num" },
     ],
-    voters: [
-      {
-        voter: "lat1fs9m6p59antawy7u2g5kx4xkaup78m0m2pu27y",
-        amount: "1000 LAT",
-        block_num: "3000000",
-      },
-    ],
+    voters: [],
   }),
   created() {
-    this.fetchData(this.$route.params.enclavePublicKey);
+    // query storage provider info
+    this.$http
+      .get("http://127.0.0.1:8081/miner/" + this.$route.params.enclavePublicKey)
+      .then(
+        function (res) {
+          console.log(res);
+          if (res.status == 200) {
+            const ret = res.body;
+            // render info
+            const providerInfo = [
+              {
+                name: "节点名称",
+                value: ret.minerInfo[1],
+              },
+              {
+                name: "IPFS Peer Id",
+                value: ret.minerInfo[2],
+              },
+              {
+                name: "所在地区",
+                value: ret.minerInfo[3],
+              },
+              {
+                name: "节点网址",
+                value: ret.minerInfo[4],
+              },
+              {
+                name: "SGX 公钥",
+                value: ret.miner[0],
+              },
+              {
+                name: "公钥 LAT 格式",
+                value: ret.miner[1],
+              },
+              {
+                name: "接收奖励地址",
+                value: ret.miner[2],
+              },
+              {
+                name: "区块链账号",
+                value: ret.miner[3],
+              },
+              {
+                name: "抵押数量",
+                value: ret.miner[4],
+              },
+              {
+                name: "抵押存储空间",
+                value: ret.miner[5],
+              },
+              {
+                name: "委托数量",
+                value: ret.miner[6],
+              },
+              {
+                name: "委托存储空间",
+                value: ret.miner[7],
+              },
+              {
+                name: "委托分红比例",
+                value: ret.miner[8] + " %",
+              },
+              {
+                name: "存储证明时间戳",
+                value: ret.verifyStorageProof[0],
+              },
+              {
+                name: "存储证明任务空间",
+                value: ret.verifyStorageProof[1],
+              },
+              {
+                name: "存储证明空闲空间",
+                value: ret.verifyStorageProof[2],
+              },
+              {
+                name: "存储证明上传区块号",
+                value: ret.verifyStorageProof[3],
+              },
+              {
+                name: "存储证明签名",
+                value: ret.verifyStorageProof[4],
+              },
+              {
+                name: "领取奖励区块号",
+                value: ret.marketStorageProof[1],
+              },
+              {
+                name: "接单列表",
+                value: ret.marketStorageProof[2],
+              },
+            ];
+            console.log(providerInfo);
+            this.providerInfo = providerInfo;
+
+            // render stake list
+            let voters = [];
+            for (let i = 0; i < ret.stakeRecord.length; i++) {
+              voters.push({
+                voter: ret.stakeRecord[i][0],
+                amount: ret.stakeRecord[i][2] / UNIT + " LAT",
+                block_num: ret.stakeRecord[i][3],
+              });
+            }
+            this.voters = voters;
+          }
+        },
+        function (error) {
+          console.log(error);
+        }
+      );
   },
   methods: {
-    fetchData(enclavePublicKey) {
-      console.log(enclavePublicKey);
-    },
     handleClick(value) {
       console.log(value);
     },
@@ -123,7 +170,8 @@ export default {
 </script>
 
 <style>
-.v-data-table__wrapper table tr td {
-  font-size: 1rem;
+tr td {
+  width: 200px;
 }
 </style>
+
