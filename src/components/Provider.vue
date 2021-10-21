@@ -3,39 +3,50 @@
     <br />
     <v-toolbar-title>存储节点详细信息</v-toolbar-title>
     <br />
-    <v-simple-table>
-      <template v-slot:default>
-        <tbody>
-          <tr v-for="item in providerInfo" :key="item.name">
-            <td>{{ item.name }}</td>
-            <td>{{ item.value }}</td>
-          </tr>
-        </tbody>
-      </template>
-    </v-simple-table>
+    <div class="text-center" v-show="loading">
+      <v-progress-circular
+        :size="50"
+        color="primary"
+        indeterminate
+      ></v-progress-circular>
+    </div>
+    <div v-show="!loading">
+      <v-simple-table>
+        <template v-slot:default>
+          <tbody>
+            <tr v-for="item in providerInfo" :key="item.name">
+              <td>{{ item.name }}</td>
+              <td>{{ item.value }}</td>
+            </tr>
+          </tbody>
+        </template>
+      </v-simple-table>
 
-    <br /><br />
+      <br /><br />
 
-    <v-toolbar-title>存储节点投票列表</v-toolbar-title>
-    <br />
-    <v-data-table
-      :headers="headers"
-      :items="voters"
-      hide-default-footer
-      class="elevation-1"
-      @click:row="handleClick"
-    ></v-data-table>
-    <br /><br />
+      <v-toolbar-title>存储节点投票列表</v-toolbar-title>
+      <br />
+      <v-data-table
+        :headers="headers"
+        :items="voters"
+        hide-default-footer
+        class="elevation-1"
+        @click:row="handleClick"
+      ></v-data-table>
+      <br /><br />
+    </div>
   </v-container>
 </template>
 
 
 <script>
 const UNIT = 1000000000000000000;
+const GB = 1024 * 1024 * 1024;
 
 export default {
   name: "Provider",
   data: () => ({
+    loading: true,
     providerInfo: [],
     headers: [
       {
@@ -55,7 +66,6 @@ export default {
       .get("http://127.0.0.1:8081/miner/" + this.$route.params.enclavePublicKey)
       .then(
         function (res) {
-          console.log(res);
           if (res.status == 200) {
             const ret = res.body;
             // render info
@@ -94,19 +104,19 @@ export default {
               },
               {
                 name: "抵押数量",
-                value: ret.miner[4],
+                value: ret.miner[4] / UNIT + " DAT",
               },
               {
                 name: "抵押存储空间",
-                value: ret.miner[5],
+                value: ret.miner[5] / GB + " GB",
               },
               {
                 name: "委托数量",
-                value: ret.miner[6],
+                value: ret.miner[6] / UNIT + " DAT",
               },
               {
                 name: "委托存储空间",
-                value: ret.miner[7],
+                value: ret.miner[7] / GB + " GB",
               },
               {
                 name: "委托分红比例",
@@ -141,8 +151,8 @@ export default {
                 value: ret.marketStorageProof[2],
               },
             ];
-            console.log(providerInfo);
             this.providerInfo = providerInfo;
+            this.loading = false;
 
             // render stake list
             let voters = [];

@@ -1,65 +1,96 @@
 <template>
   <v-container>
     <br />
-    <v-card class="d-inline-flex ma-5" max-width="200">
-      <v-card-text>
-        <p class="text-h5 text--primary">
-          {{ mining.prePeriodTotalReward }}
-        </p>
-        <div class="text--primary">上一周期总奖励</div>
-      </v-card-text>
-    </v-card>
+    <div class="text-center" v-show="loading">
+      <v-progress-circular
+        :size="50"
+        color="primary"
+        indeterminate
+      ></v-progress-circular>
+    </div>
+    <div v-show="!loading">
+      <v-card class="d-inline-flex ma-5" max-width="200">
+        <v-card-text>
+          <p class="text-h5 text--primary">
+            {{ mining.prePeriodTotalReward }}
+          </p>
+          <div class="text--primary">上一周期总奖励</div>
+        </v-card-text>
+      </v-card>
 
-    <v-card class="d-inline-flex ma-5" max-width="200">
-      <v-card-text>
-        <p class="text-h5 text--primary">
-          {{ mining.prePeriodRemainReward }}
-        </p>
-        <div class="text--primary">上一周期未领取奖励</div>
-      </v-card-text>
-    </v-card>
+      <v-card class="d-inline-flex ma-5" max-width="200">
+        <v-card-text>
+          <p class="text-h5 text--primary">
+            {{ mining.prePeriodRemainReward }}
+          </p>
+          <div class="text--primary">上一周期未领取奖励</div>
+        </v-card-text>
+      </v-card>
 
-    <v-card class="d-inline-flex ma-5" max-width="200">
-      <v-card-text>
-        <p class="text-h5 text--primary">
-          {{ mining.prePeriodTotalCapacity }}
-        </p>
-        <div class="text--primary">上一周期总空间</div>
-      </v-card-text>
-    </v-card>
+      <v-card class="d-inline-flex ma-5" max-width="200">
+        <v-card-text>
+          <p class="text-h5 text--primary">
+            {{ mining.prePeriodTotalCapacity }}
+          </p>
+          <div class="text--primary">上一周期总空间</div>
+        </v-card-text>
+      </v-card>
 
-    <v-card class="d-inline-flex ma-5" max-width="200">
-      <v-card-text>
-        <p class="text-h5 text--primary">
-          {{ mining.prePeriodTotalTaskReward }}
-        </p>
-        <div class="text--primary">上一周期任务空间奖励</div>
-      </v-card-text>
-    </v-card>
+      <v-card class="d-inline-flex ma-5" max-width="200">
+        <v-card-text>
+          <p class="text-h5 text--primary">
+            {{ mining.prePeriodTotalTaskReward }}
+          </p>
+          <div class="text--primary">上一周期任务空间奖励</div>
+        </v-card-text>
+      </v-card>
 
-    <v-card class="d-inline-flex ma-5" max-width="200">
-      <v-card-text>
-        <p class="text-h5 text--primary">
-          {{ mining.prePeriodTotalIdleReward }}
-        </p>
-        <div class="text--primary">上一周期空闲空间奖励</div>
-      </v-card-text>
-    </v-card>
-    <br /><br /><br /><br />
-    <v-toolbar-title>订单列表</v-toolbar-title>
-    <br />
+      <v-card class="d-inline-flex ma-5" max-width="200">
+        <v-card-text>
+          <p class="text-h5 text--primary">
+            {{ mining.prePeriodTotalIdleReward }}
+          </p>
+          <div class="text--primary">上一周期空闲空间奖励</div>
+        </v-card-text>
+      </v-card>
 
-    <v-data-table
-      :headers="headers"
-      :items="deals"
-      :page.sync="page"
-      hide-default-footer
-      class="elevation-1"
-      @click:row="handleClick"
-      @page-count="pageCount = $event"
-    ></v-data-table>
-    <div class="text-center pt-2">
-      <v-pagination v-model="page" :length="pageCount"></v-pagination>
+      <br /><br />
+      <br /><br />
+
+      <v-form ref="form">
+        <v-container>
+          <v-row>
+            <v-col cols="12" md="1"></v-col>
+            <v-col cols="12" md="8">
+              <v-text-field
+                v-model="keyword"
+                label="请输入订单ID/存储节点公钥"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="2">
+              <v-btn class="mr-4" @click="search"> Search </v-btn>
+            </v-col>
+            <v-col cols="12" md="1"> </v-col>
+          </v-row>
+        </v-container>
+      </v-form>
+
+      <br /><br />
+      <v-toolbar-title>订单列表</v-toolbar-title>
+      <br />
+
+      <v-data-table
+        :headers="headers"
+        :items="deals"
+        :page.sync="page"
+        hide-default-footer
+        class="elevation-1"
+        @click:row="handleClick"
+        @page-count="pageCount = $event"
+      ></v-data-table>
+      <div class="text-center pt-2">
+        <v-pagination v-model="page" :length="pageCount"></v-pagination>
+      </div>
     </div>
   </v-container>
 </template>
@@ -93,6 +124,7 @@ export default {
             prePeriodTotalIdleReward: Number(prePeriodTotalIdleReward) + " DAT",
           };
           this.mining = mining;
+          this.loading = false;
         }
       },
       function (error) {
@@ -103,7 +135,6 @@ export default {
     // get opened deal
     this.$http.get("http://127.0.0.1:8081/deal").then(
       function (res) {
-        console.log(res);
         if (res.status == 200) {
           this.deals = res.body;
           // format deals info
@@ -116,6 +147,7 @@ export default {
             this.deals[i].rewardBalance =
               this.deals[i].rewardBalance / UNIT + " DAT";
           }
+          this.loading = false;
         }
       },
       function (error) {
@@ -124,6 +156,8 @@ export default {
     );
   },
   data: () => ({
+    loading: true,
+    keyword: "",
     mining: {},
     page: 1,
     pageCount: 1,
@@ -145,6 +179,19 @@ export default {
     handleClick(deal) {
       // navigate to deal info pages
       this.$router.push({ name: "deal", params: { dealId: deal.cid } });
+    },
+    search() {
+      const keyword = this.keyword;
+      if (keyword.length == 46) {
+        this.$router.push({ name: "deal", params: { dealId: keyword } });
+      } else if (keyword.length == 130) {
+        this.$router.push({
+          name: "provider",
+          params: { enclavePublicKey: keyword },
+        });
+      } else {
+        console.log("invalid keyword");
+      }
     },
   },
 };

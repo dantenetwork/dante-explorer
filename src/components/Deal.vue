@@ -3,29 +3,38 @@
     <br />
     <v-toolbar-title>订单详细信息</v-toolbar-title>
     <br />
-    <v-simple-table>
-      <template v-slot:default>
-        <tbody>
-          <tr v-for="item in dealInfo" :key="item.name">
-            <td>{{ item.name }}</td>
-            <td>{{ item.value }}</td>
-          </tr>
-        </tbody>
-      </template>
-    </v-simple-table>
+    <div class="text-center" v-show="loading">
+      <v-progress-circular
+        :size="50"
+        color="primary"
+        indeterminate
+      ></v-progress-circular>
+    </div>
+    <div v-show="!loading">
+      <v-simple-table>
+        <template v-slot:default>
+          <tbody>
+            <tr v-for="item in dealInfo" :key="item.name">
+              <td>{{ item.name }}</td>
+              <td>{{ item.value }}</td>
+            </tr>
+          </tbody>
+        </template>
+      </v-simple-table>
 
-    <br /><br />
+      <br /><br />
 
-    <v-toolbar-title>已接单的存储节点列表</v-toolbar-title>
-    <br />
-    <v-data-table
-      :headers="headers"
-      :items="storageProviderList"
-      hide-default-footer
-      class="elevation-1"
-      @click:row="handleClick"
-    ></v-data-table>
-    <br /><br />
+      <v-toolbar-title>已接单的存储节点列表</v-toolbar-title>
+      <br />
+      <v-data-table
+        :headers="headers"
+        :items="storageProviderList"
+        hide-default-footer
+        class="elevation-1"
+        @click:row="handleClick"
+      ></v-data-table>
+      <br /><br />
+    </div>
   </v-container>
 </template>
 
@@ -35,6 +44,7 @@ const UNIT = 1000000000000000000;
 export default {
   name: "Deal",
   data: () => ({
+    loading: true,
     dealInfo: [],
     storageProviderPubKeyList: [],
     headers: [
@@ -86,7 +96,6 @@ export default {
               } else if (i == 9 || i == 10) {
                 value = value / UNIT + " DAT";
               } else if (i == 11) {
-                console.log(value);
                 for (let i = 0; i < value.length; i++) {
                   this.storageProviderList.push({ enclavePublicKey: value[i] });
                 }
@@ -98,6 +107,7 @@ export default {
               });
             }
             this.dealInfo = dealInfo;
+            this.loading = false;
           }
         },
         function (error) {
@@ -107,7 +117,6 @@ export default {
   },
   methods: {
     handleClick(provider) {
-      console.log(provider);
       // navigate to provider info pages
       this.$router.push({
         name: "provider",
