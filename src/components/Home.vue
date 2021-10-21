@@ -3,36 +3,46 @@
     <br />
     <v-card class="d-inline-flex ma-5" max-width="200">
       <v-card-text>
-        <p class="text-h5 text--primary">654,109,876</p>
-        <div class="text--primary">上一周期网络空间大小</div>
-      </v-card-text>
-    </v-card>
-
-    <v-card class="d-inline-flex ma-5" max-width="200">
-      <v-card-text>
-        <p class="text-h5 text--primary">654,109,876</p>
-        <div class="text--primary">上一周期节点存储大小</div>
-      </v-card-text>
-    </v-card>
-
-    <v-card class="d-inline-flex ma-5" max-width="200">
-      <v-card-text>
-        <p class="text-h5 text--primary">654,109,876</p>
-        <div class="text--primary">上一周期结束区块号</div>
-      </v-card-text>
-    </v-card>
-
-    <v-card class="d-inline-flex ma-5" max-width="200">
-      <v-card-text>
-        <p class="text-h5 text--primary">654,109,876</p>
+        <p class="text-h5 text--primary">
+          {{ mining.prePeriodTotalReward }}
+        </p>
         <div class="text--primary">上一周期总奖励</div>
       </v-card-text>
     </v-card>
 
     <v-card class="d-inline-flex ma-5" max-width="200">
       <v-card-text>
-        <p class="text-h5 text--primary">654,109,876</p>
+        <p class="text-h5 text--primary">
+          {{ mining.prePeriodRemainReward }}
+        </p>
         <div class="text--primary">上一周期未领取奖励</div>
+      </v-card-text>
+    </v-card>
+
+    <v-card class="d-inline-flex ma-5" max-width="200">
+      <v-card-text>
+        <p class="text-h5 text--primary">
+          {{ mining.prePeriodTotalCapacity }}
+        </p>
+        <div class="text--primary">上一周期总空间</div>
+      </v-card-text>
+    </v-card>
+
+    <v-card class="d-inline-flex ma-5" max-width="200">
+      <v-card-text>
+        <p class="text-h5 text--primary">
+          {{ mining.prePeriodTotalTaskReward }}
+        </p>
+        <div class="text--primary">上一周期任务空间奖励</div>
+      </v-card-text>
+    </v-card>
+
+    <v-card class="d-inline-flex ma-5" max-width="200">
+      <v-card-text>
+        <p class="text-h5 text--primary">
+          {{ mining.prePeriodTotalIdleReward }}
+        </p>
+        <div class="text--primary">上一周期空闲空间奖励</div>
       </v-card-text>
     </v-card>
     <br /><br /><br /><br />
@@ -58,7 +68,38 @@
 <script>
 export default {
   name: "Home",
+  created() {
+    const UNIT = 1000000000000000000;
+    this.$http.get("http://127.0.0.1:8081/mining").then(
+      function (res) {
+        if (res.status == 200) {
+          // calculate reward & capacity
+          const prePeriodTotalReward = (res.body[2] / UNIT).toFixed(0);
+          const prePeriodRemainReward = (res.body[3] / UNIT).toFixed(0);
+          const prePeriodTotalCapacity = (res.body[7] / 1024) * 1024 * 1024;
+          const prePeriodTotalTaskReward = (res.body[6] / UNIT).toFixed(0);
+          const prePeriodTotalIdleReward = (res.body[5] / UNIT).toFixed(0);
+
+          // formate reward & capcacity
+          let mining = {
+            prePeriodTotalReward:
+              Number(prePeriodTotalReward).toLocaleString() + " DAT",
+            prePeriodRemainReward:
+              Number(prePeriodRemainReward).toLocaleString() + " DAT",
+            prePeriodTotalCapacity: Number(prePeriodTotalCapacity) + " GB",
+            prePeriodTotalTaskReward: Number(prePeriodTotalTaskReward) + " DAT",
+            prePeriodTotalIdleReward: Number(prePeriodTotalIdleReward) + " DAT",
+          };
+          this.mining = mining;
+        }
+      },
+      function (error) {
+        console.log(error);
+      }
+    );
+  },
   data: () => ({
+    mining: {},
     page: 1,
     pageCount: 1,
     headers: [
