@@ -190,7 +190,7 @@ export default {
           params: { enclavePublicKey: keyword },
         });
       } else {
-        console.log("invalid keyword");
+        alert("查询无结果");
       }
     },
   },

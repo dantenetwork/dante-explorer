@@ -1,6 +1,6 @@
 # Dante Explorer
 
-#### dante explorer based on Vue.js & Vuetify
+#### Blockchain explorer for dante network based on Vue.js & Vuetify
 
 ## Project setup
 ```
