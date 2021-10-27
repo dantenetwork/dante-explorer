@@ -24,4 +24,7 @@ export default {
 .text-start:hover {
   cursor: pointer;
 }
+.container {
+  max-width: 1200px !important;
+}
 </style>
