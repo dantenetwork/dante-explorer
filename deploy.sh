@@ -1,0 +1,1 @@
+rsync -av --delete dist/ /var/www/html
