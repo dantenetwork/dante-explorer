@@ -60,7 +60,7 @@ export default {
   created() {
     // get opened deal
     this.$http
-      .get("http://127.0.0.1:8081/deal/" + this.$route.params.dealId)
+      .get("http://192.168.1.64:8081/deal/" + this.$route.params.dealId)
       .then(
         function (res) {
           if (res.status == 200) {

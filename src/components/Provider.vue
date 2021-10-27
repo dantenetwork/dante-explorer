@@ -63,7 +63,9 @@ export default {
   created() {
     // query storage provider info
     this.$http
-      .get("http://127.0.0.1:8081/miner/" + this.$route.params.enclavePublicKey)
+      .get(
+        "http://192.168.1.64:8081/miner/" + this.$route.params.enclavePublicKey
+      )
       .then(
         function (res) {
           if (res.status == 200) {

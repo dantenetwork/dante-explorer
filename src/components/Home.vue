@@ -103,7 +103,7 @@ export default {
   name: "Home",
   created() {
     // get mining info
-    this.$http.get("http://127.0.0.1:8081/mining").then(
+    this.$http.get("http://192.168.1.64:8081/mining").then(
       function (res) {
         if (res.status == 200) {
           // calculate reward & capacity
@@ -133,7 +133,7 @@ export default {
     );
 
     // get opened deal
-    this.$http.get("http://127.0.0.1:8081/deal").then(
+    this.$http.get("http://192.168.1.64:8081/deal").then(
       function (res) {
         if (res.status == 200) {
           this.deals = res.body;
