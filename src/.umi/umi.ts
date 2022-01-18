@@ -4,8 +4,8 @@ import '@@/core/devScripts';
 import { plugin } from './core/plugin';
 import './core/pluginRegister';
 import { createHistory } from './core/history';
-import { ApplyPluginsType } from 'G:/lhc/private-storage-ts/node_modules/@umijs/runtime';
-import { renderClient } from 'G:/lhc/private-storage-ts/node_modules/@umijs/renderer-react';
+import { ApplyPluginsType } from 'G:/lhc/dante-explorer/node_modules/@umijs/runtime';
+import { renderClient } from 'G:/lhc/dante-explorer/node_modules/@umijs/renderer-react';
 import { getRoutes } from './core/routes';
 
 

@@ -3,11 +3,11 @@ import {
   createIntl,
   IntlShape,
   MessageDescriptor,
-} from 'G:/lhc/private-storage-ts/node_modules/react-intl';
+} from 'G:/lhc/dante-explorer/node_modules/react-intl';
 import { ApplyPluginsType } from 'umi';
 import { event, LANG_CHANGE_EVENT } from './locale';
 // @ts-ignore
-import warning from 'G:/lhc/private-storage-ts/node_modules/@umijs/plugin-locale/node_modules/warning/warning.js';
+import warning from 'G:/lhc/dante-explorer/node_modules/@umijs/plugin-locale/node_modules/warning/warning.js';
 
 import { plugin } from '../core/plugin';
 
@@ -34,7 +34,7 @@ export {
   defineMessages,
   injectIntl,
   useIntl,
-} from 'G:/lhc/private-storage-ts/node_modules/react-intl';
+} from 'G:/lhc/dante-explorer/node_modules/react-intl';
 
 let g_intl: IntlShape;
 

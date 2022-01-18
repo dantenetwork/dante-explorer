@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React from 'react';
-import { ApplyPluginsType, dynamic } from 'G:/lhc/private-storage-ts/node_modules/@umijs/runtime';
+import { ApplyPluginsType, dynamic } from 'G:/lhc/dante-explorer/node_modules/@umijs/runtime';
 import * as umiExports from './umiExports';
 import { plugin } from './plugin';
 import LoadingComponent from '@/Loading';

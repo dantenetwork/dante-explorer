@@ -6,9 +6,9 @@ import { EffectsCommandMap, SubscriptionAPI } from 'dva';
 import { match } from 'react-router-dom';
 import { Location, LocationState, History } from 'history';
 
-export * from 'G:/lhc/private-storage-ts/src/models/common';
-export * from 'G:/lhc/private-storage-ts/src/models/home';
-export * from 'G:/lhc/private-storage-ts/src/models/order';
+export * from 'G:/lhc/dante-explorer/src/models/common';
+export * from 'G:/lhc/dante-explorer/src/models/home';
+export * from 'G:/lhc/dante-explorer/src/models/order';
 
 export interface Action<T = any> {
   type: T

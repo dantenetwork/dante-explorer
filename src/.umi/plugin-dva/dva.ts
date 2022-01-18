@@ -3,12 +3,12 @@ import { Component } from 'react';
 import { ApplyPluginsType } from 'umi';
 import dva from 'dva';
 // @ts-ignore
-import createLoading from 'G:/lhc/private-storage-ts/node_modules/dva-loading/dist/index.esm.js';
+import createLoading from 'G:/lhc/dante-explorer/node_modules/dva-loading/dist/index.esm.js';
 import { plugin, history } from '../core/umiExports';
-import ModelCommon0 from 'G:/lhc/private-storage-ts/src/models/common.tsx';
-import ModelHome1 from 'G:/lhc/private-storage-ts/src/models/home.tsx';
-import ModelOrder2 from 'G:/lhc/private-storage-ts/src/models/order.tsx';
-import dvaImmer, { enableES5, enableAllPlugins } from 'G:/lhc/private-storage-ts/node_modules/dva-immer/dist/index.js';
+import ModelCommon0 from 'G:/lhc/dante-explorer/src/models/common.tsx';
+import ModelHome1 from 'G:/lhc/dante-explorer/src/models/home.tsx';
+import ModelOrder2 from 'G:/lhc/dante-explorer/src/models/order.tsx';
+import dvaImmer, { enableES5, enableAllPlugins } from 'G:/lhc/dante-explorer/node_modules/dva-immer/dist/index.js';
 
 let app:any = null;
 

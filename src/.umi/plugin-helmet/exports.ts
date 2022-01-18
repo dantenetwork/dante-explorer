@@ -1,3 +1,3 @@
 // @ts-nocheck
 // @ts-ignore
-export { Helmet } from 'G:/lhc/private-storage-ts/node_modules/react-helmet';
+export { Helmet } from 'G:/lhc/dante-explorer/node_modules/react-helmet';

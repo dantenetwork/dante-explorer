@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { createBrowserHistory, History } from 'G:/lhc/private-storage-ts/node_modules/@umijs/runtime';
+import { createBrowserHistory, History } from 'G:/lhc/dante-explorer/node_modules/@umijs/runtime';
 
 let options = {
   "basename": "/"
