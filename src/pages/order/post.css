@@ -1,0 +1,67 @@
+.postForm .title label{
+  font-size: 17px;
+  font-family: Microsoft YaHei UI;
+  font-weight: bold;
+  color: #12164A;
+}
+.postForm .title label::after{
+  content: "";
+}
+.postForm .items,.postForm .title{
+  margin-bottom: 50px;
+}
+.postForm .items label{
+  font-size: 16px;
+  font-family: Microsoft YaHei UI;
+  font-weight: 400;
+  color: #12164A;
+
+}
+.postForm .ant-form-item-control{
+  margin-left: 25px;
+}
+.postForm .ant-form-item-control-input-content{
+  flex-direction: row;
+}
+.postForm .btn_ori{
+  margin-left: 0;
+  display: inline-block;
+}
+.postForm .ant-radio-checked .ant-radio-inner{
+  border-color: #3BCFF0;
+}
+.postForm .ant-radio-inner::after{
+  background-color: #3BCFF0;
+}
+.postForm .ant-input-number{
+  width: 128px;
+  margin-right: 15px;
+}
+.postForm .input{
+  background: #F5F8FB;
+  border: 1px solid rgba(72, 94, 127, 0.1);
+  border-radius: 4px;
+}
+.postForm .btn .ant-form-item-control{
+  margin-left: auto;
+}
+.postForm .btn_ori.btn_ori_submit{
+  display: inline-block;
+  padding: 0 50px;
+  margin-left: 0;
+}
+.postForm .btn_ori_cancel{
+  margin-left: 36px;
+  height: 35px;
+  background: #C6D3E0;
+  border-radius: 18px;
+  font-size: 16px;
+  font-family: Microsoft YaHei UI;
+  font-weight: 400;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  padding: 0 50px;
+  display: inline-block;
+  border: none;
+}

@@ -1,0 +1,131 @@
+.max-body {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.contain {
+    background: #FFFFFF;
+    box-shadow: 2px 2px 13px 0px rgba(146, 158, 171, 0.25);
+    /* opacity: 0.6; */
+    border-radius: 10px;
+    margin-top: 30px;
+    overflow: hidden;
+    padding: 0px 50px 30px;
+    box-sizing: border-box;
+    margin-bottom: 30px;
+}
+.flex {
+  display: flex;
+}
+
+.flex_jc {
+  justify-content: center;
+}
+
+.flex_ac {
+  align-items: center;
+}
+
+.flex_jcac {
+  justify-content: center;
+  align-items: center;
+}
+
+/* content */
+.title {
+    font-size: 17px;
+    font-family: Microsoft YaHei UI;
+    font-weight: bold;
+    color: #12164A;
+    margin: 30px 0;
+    display: flex;
+    align-items: center;
+}
+.alignCenter{
+    text-align: center;
+}
+.link{
+    font-size: 12px;
+    font-family: Microsoft YaHei UI;
+    font-weight: 400;
+    color: #2FCCEF;
+    line-height: 12px;
+}
+
+.utable{
+  box-shadow: 2px 2px 13px 0px rgba(146, 158, 171, 0.1);
+  border-radius: 10px;
+}
+.utable .ant-table-container table > thead > tr:first-child th:first-child {
+  /* background: #ECF3FA; */
+  border-top-left-radius: 10px;
+}
+.utable .ant-table-container table > thead > tr:first-child th:last-child{
+  border-top-right-radius: 10px;
+}
+.utable .ant-table-thead > tr > th{
+  background: #ECF3FA;
+}
+.utable .ant-table-tbody tr{
+  background: #FFFFFF;
+  border: 1px solid rgba(102, 104, 108, 0.07);
+}
+.utable .ant-table-tbody tr:nth-child(2n){
+  background: #FAFBFC;
+}
+.utable .ant-table-thead > tr > th:not(:last-child):not(.ant-table-selection-column):not(.ant-table-row-expand-icon-cell):not([colspan])::before{
+  width: 0;
+}
+.upagination{
+    text-align: right;
+    padding: 0px 0 30px;
+}
+.upagination .ant-pagination{
+  font-size: 14px;
+  font-family: Microsoft YaHei UI;
+  font-weight: 400;
+  color: #8995A5;
+}
+.upagination .ant-pagination-item a{
+  font-size: 14px;
+  font-family: Microsoft YaHei UI;
+  font-weight: 400;
+  color: #8995A5;
+}
+.upagination .ant-pagination-options-size-changer.ant-select{
+  font-size: 14px;
+  font-family: Microsoft YaHei UI;
+  font-weight: 400;
+  color: #8995A5;
+}
+.upagination .ant-pagination-prev button,.upagination .ant-pagination-next button{
+  font-size: 14px;
+  font-family: Microsoft YaHei UI;
+  font-weight: 400;
+  color: #8995A5;
+}
+.upagination .ant-pagination-disabled .ant-pagination-item-link,.upagination  .ant-pagination-disabled:hover .ant-pagination-item-link,.upagination  .ant-pagination-disabled:focus-visible .ant-pagination-item-link{
+  color: #dedede;
+}
+.btn_ori{
+  margin-left: 36px;
+  height: 35px;
+  background: #FFBB04;
+  border-radius: 18px;
+  font-size: 16px;
+  font-family: Microsoft YaHei UI;
+  font-weight: 400;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  padding: 0 18px;
+  border: none;
+}
+.upagination .ant-pagination-item-active {
+  background: #2FCCEF;
+  border: 1px solid rgba(102, 104, 108, 0.07);
+  border-radius: 4px;
+}
+.upagination .ant-pagination-item-active a {
+  color: #FFFFFF;
+}

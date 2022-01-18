@@ -1,0 +1,17 @@
+.banner .slick-dots li{
+  width: 21px;
+  height: 21px;
+}
+.banner .slick-dots li button{
+  width: 21px;
+  height: 21px;
+  background: #FFFFFF;
+  opacity: 0.5;
+  border-radius: 50%;
+}
+.banner .slick-dots li.slick-active button{
+  background: #FFFFFF;
+  width: 21px;
+  height: 21px;
+  opacity: 1;
+}

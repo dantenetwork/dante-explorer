@@ -1,0 +1,94 @@
+.nav .ant-input{
+  background: #F5F8FB;
+  font-size: 18px;
+  font-family: Microsoft YaHei UI;
+  font-weight: 400;
+  color: rgba(18, 22, 74, 1);
+  line-height: 92px;
+  
+}
+.nav .ant-input::-webkit-input-placeholder{
+  color:#12164A;
+  opacity: 0.3;
+}
+.nav .ant-input::-moz-placeholder{/* Mozilla Firefox 19+ */
+  color:#12164A;
+  opacity: 0.3;
+}
+.nav .ant-input:-moz-placeholder{/* Mozilla Firefox 4 to 18 */
+  color: #12164A;
+  opacity: 0.3;
+}
+.nav .ant-input:-ms-input-placeholder{
+  color: #12164A;
+  opacity: 0.3;
+}
+.nav .tabs .ant-tabs-nav{
+  margin-bottom: 0;
+}
+.nav .tabs .ant-tabs-nav::before{
+  border:0;
+}
+.nav .ant-tabs-tab{
+  padding: 34px 0;
+}
+.nav .tabs .ant-tabs-tab-btn{
+  font-size: 20px;
+  font-family: "Microsoft YaHei UI";
+  font-weight: 400;
+  color: #12164A;
+}
+.nav .tabs .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn{
+  font-size: 20px;
+  font-family: "Microsoft YaHei UI";
+  font-weight: 400;
+  color: #12164A;
+}
+.nav .tabs .ant-tabs-ink-bar{
+  height: 5px;
+  background: #2FCCEF;
+  border-radius: 4px;
+}
+
+/* 
+.screen-lg{
+
+} */
+.screen-lg .n_row___3DjHh{
+  padding: 0 30px;
+}
+.screen-lg .logo___q9n5Q{
+  width: 200px !important;
+}
+.screen-lg .input___2TLcf{
+  width: 300px !important;
+}
+
+.screen-md{
+  min-width: 900px;
+}
+.screen-md .n_row___3DjHh{
+  padding: 0 10px;
+}
+.screen-md .nav{
+  overflow-x: scroll;
+}
+.screen-md .logo___q9n5Q{
+  width: 130px !important;
+  overflow: hidden;
+}
+.screen-md .n_row___3DjHh{
+  min-width: 900px;
+}
+.screen-md .input___2TLcf{
+  width: 260px !important;
+}
+.screen-md .ant-input{
+  font-size: 16px;
+}
+.screen-md .user___3LIH8{
+  margin-left: 15px !important;
+}
+.screen-md .ant-tabs-tab + .ant-tabs-tab {
+  margin: 0 0 0 20px;
+}
