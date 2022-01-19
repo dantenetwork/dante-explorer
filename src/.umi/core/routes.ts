@@ -57,7 +57,7 @@ export function getRoutes() {
       {
         "path": "/storage/detail",
         "component": dynamic({ loader: () => import(/* webpackChunkName: 'p__storage__detail' */'@/pages/storage/detail'), loading: LoadingComponent}),
-        "title": "存储节点",
+        "title": "存储节点详情",
         "exact": true
       },
       {

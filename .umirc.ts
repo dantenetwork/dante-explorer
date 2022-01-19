@@ -45,7 +45,7 @@ export default defineConfig({
         {
           path: '/storage/detail',
           component: '@/pages/storage/detail',
-          title: '存储节点',
+          title: '存储节点详情',
         },
         { component: '@/pages/404', title: '404' },
       ],
@@ -56,7 +56,7 @@ export default defineConfig({
     immer: true,
     hmr: true,
   },
-  mfsu: {}, //热更新
+  // mfsu: {}, //热更新
   // cssModulesTypescriptLoader: {},
   fastRefresh: {}, //快速刷新
   // proxy: {//代理

@@ -9,6 +9,7 @@ import { config } from '@/config';
 function Home(props: any) {
   const [statusData, setData] = useState({
     cur_period_total_capacity: 0,
+    total_staker_count: 0,
     nodes_number: 0,
   });
   useEffect(() => {
@@ -21,15 +22,12 @@ function Home(props: any) {
   }, []);
 
   const init = async () => {
+    console.log(config.UNIT);
     try {
       let data: any = await get(api.home.global_info);
-      console.log(data);
       setData((oldData) => ({
         ...oldData,
-        cur_period_total_capacity: Number(
-          (data?.globalInfo[9] / 1024) * 1024 * 1024,
-        ),
-        nodes_number: data.minerCount,
+        ...data,
       }));
     } catch (error: any) {
       message.error(error);
@@ -103,7 +101,9 @@ function Home(props: any) {
           </div>
           <div className={styles.status}>
             <div className={styles.fstatus_title}>全网委托者数量</div>
-            <div className={styles.fstatus_txt}>XXXXXX</div>
+            <div className={styles.fstatus_txt}>
+              {statusData.total_staker_count}
+            </div>
           </div>
           <div className={styles.status}>
             <div className={styles.fstatus_title}>本周期全网收益</div>

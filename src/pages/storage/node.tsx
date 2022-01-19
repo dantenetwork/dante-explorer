@@ -13,16 +13,21 @@ console.log(namespace_shop);
 
 interface Item {
   key: string;
-  id: string;
-  size: string;
-  createdTime: string;
-  overTime: string;
+  totalCapacity: Number;
+  taskVolume: string;
+  Delegator: Number;
+  joinTime: string;
+  totalPledge: string;
+  entrustedIncome: Number;
 }
 
 const originData: Item[] = [];
 
 function node(props: any) {
   const [dataList, setDataList] = useState(originData);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [hasNext, setHasNext] = useState(true);
   const [tbH, setTbH] = useState(600);
   useEffect(() => {
     // 需要在 componentDidMount 執行的内容
@@ -49,29 +54,26 @@ function node(props: any) {
   const getList = async () => {
     const originData: Item[] = [];
     try {
-      // let data:any = await get(api.storage.list)
-      // console.log(data)
+      if (!hasNext) return false;
+      let data: any = await get(api.storage.list, { skip: page });
+      setDataList(data.list);
+      setTotal(data.total);
+      if (data.total - page * 10 > 10) {
+        setPage(page + 1);
+        setHasNext(true);
+      } else {
+        setHasNext(false);
+      }
       // setDataList((oldData)=>({
-      //   ...oldData,
-      //   cur_period_total_capacity:Number((data?.globalInfo[9] / 1024) * 1024 * 1024),
-      //   nodes_number:data.minerCount
+      //   ...data.list
       // }))
     } catch (error: any) {
       message.error(error);
     }
-    console.log(originData);
-    for (let i = 0; i < 50; i++) {
-      originData.push({
-        key: i.toString(),
-        id: 'oxf88ce5fd607d7a27f21c3d06d3dwefwf7383249912' + i,
-        size: '3.2GB',
-        createdTime: '2021-12-28  12:23:55',
-        overTime: '2021-12-28  12:23:55',
-      });
-    }
-    setDataList(originData);
+    // setDataList(originData);
   };
 
+  const entrust = async () => {};
   // const init = async() =>{
   //   try{
   //     let data:any = await get(api.home.global_info)
@@ -89,40 +91,61 @@ function node(props: any) {
 
   const columns: any[] = [
     {
-      title: '订单ID',
-      dataIndex: 'id',
+      title: '节点ID(enclave key）',
+      dataIndex: 'key',
       width: '30%',
-      editable: true,
       align: 'center', // 设置文本居中的属性
-      render: (id: any) => (
-        <Link to={`/node/detail?id=${id}`} className="link">
-          {id}
+      render: (key: any) => (
+        <Link to={`/storage/detail?key=${key}`} className="link">
+          {key}
         </Link>
       ),
     },
     {
-      title: '文件大小',
-      dataIndex: 'size',
+      title: '总容量',
+      dataIndex: 'totalCapacity',
       width: '20%',
-      editable: true,
       align: 'center',
     },
     {
-      title: '创建时间',
-      dataIndex: 'createdTime',
+      title: '任务量',
+      dataIndex: 'taskVolume',
       width: '20%',
-      editable: true,
       align: 'center',
     },
     {
-      title: '有效期至',
-      dataIndex: 'overTime',
+      title: '委托者',
+      dataIndex: 'Delegator',
       width: '20%',
-      editable: true,
       align: 'center',
+    },
+    {
+      title: '加入时间',
+      dataIndex: 'joinTime',
+      width: '20%',
+      align: 'center',
+    },
+    {
+      title: '总质押',
+      dataIndex: 'totalPledge',
+      width: '20%',
+      align: 'center',
+    },
+    {
+      title: '委托收益比例',
+      dataIndex: 'entrustedIncome',
+      width: '20%',
+      align: 'center',
+    },
+    {
+      title: '操作',
+      dataIndex: 'key',
+      width: '20%',
+      align: 'center',
+      fixed: 'right',
+      render: () => <a onClick={(row) => entrust()}>委托</a>,
     },
   ];
-
   const mergedColumns = columns.map((col) => {
     return {
       ...col,
@@ -149,7 +172,7 @@ function node(props: any) {
       </div>
       <div className="max-body upagination">
         <Pagination
-          total={dataList.length}
+          total={total}
           pageSize={10}
           onChange={() => getList()}
           showSizeChanger
