@@ -2,6 +2,7 @@ import { defineConfig } from 'umi';
 
 export default defineConfig({
   title: 'hi',
+  base: process.env.NODE_ENV === 'production' ? '/private/' : '/',
   publicPath: process.env.NODE_ENV === 'production' ? './' : '/',
   locale: { antd: true },
   nodeModulesTransform: {

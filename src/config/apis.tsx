@@ -4,5 +4,7 @@ export const api = {
   },
   storage: {
     list: '/storage/list',
+    detail: '/storage/detail',
+    orderList: '/storage/orderList',
   },
 };

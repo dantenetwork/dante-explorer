@@ -51,7 +51,9 @@
     color: #2FCCEF;
     line-height: 12px;
 }
-
+.space{
+  height: 40px;
+}
 .utable{
   box-shadow: 2px 2px 13px 0px rgba(146, 158, 171, 0.1);
   border-radius: 10px;

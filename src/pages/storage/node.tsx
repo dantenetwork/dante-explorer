@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import styles from './node.less';
 // import './node.css'
 import { Table, message, Pagination } from 'antd';
-import { Link, connect, ConnectProps, namespace_shop } from 'umi';
+import { Link, connect, history, ConnectProps, namespace_shop } from 'umi';
 
 import axios from 'axios';
 import { get, post } from '@/utils/server';
 import { api } from '@/config/apis';
-
+const ethereum = window.ethereum;
 const MODELS_NAME = namespace_shop;
 console.log(namespace_shop);
 
@@ -29,6 +29,7 @@ function node(props: any) {
   const [page, setPage] = useState(1);
   const [hasNext, setHasNext] = useState(true);
   const [tbH, setTbH] = useState(600);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     // 需要在 componentDidMount 執行的内容
     getList();
@@ -53,6 +54,7 @@ function node(props: any) {
 
   const getList = async () => {
     const originData: Item[] = [];
+    setLoading(true);
     try {
       if (!hasNext) return false;
       let data: any = await get(api.storage.list, { skip: page });
@@ -67,27 +69,46 @@ function node(props: any) {
       // setDataList((oldData)=>({
       //   ...data.list
       // }))
+      setLoading(false);
     } catch (error: any) {
       message.error(error);
+      setLoading(false);
     }
     // setDataList(originData);
   };
 
-  const entrust = async () => {};
-  // const init = async() =>{
-  //   try{
-  //     let data:any = await get(api.home.global_info)
-  //     console.log(data)
-  //     setData((oldData)=>({
-  //       ...oldData,
-  //       cur_period_total_capacity:Number((data?.globalInfo[9] / 1024) * 1024 * 1024),
-  //       nodes_number:data.minerCount
-  //     }))
-  //   }catch(error:any){
-  //     message.error(error);
-  //   }
+  const entrust = async (key: string, row: any) => {
+    console.log(key, row, props.accountAddress);
+    if (!props.accountAddress) {
+      history.push('/login');
+    } else {
+      const selectedAddressHex = props.accountAddress;
+      const contractAddressHex = row?.latAddress;
+      const data = {
+        enclave_public_key: key,
+        amount: 0,
+      };
+      const transactionParameters = {
+        nonce: '0x00', // ignored by MetaMask
+        gasPrice: '0x4A817C800', // customizable by user during MetaMask confirmation.
+        gas: '0xF4240', // customizable by user during MetaMask confirmation.
+        to: contractAddressHex, // Required except during contract publications.
+        from: selectedAddressHex, // must match user's active address.
+        value: '0x00', // Only required to send ether to the recipient from the initiating external account.
+        data: key, // Optional, but used for defining smart contract creation and interaction.
+        chainId: '210309', // Used to prevent transaction reuse across blockchains. Auto-filled by MetaMask.
+      };
+      console.log(transactionParameters);
 
-  // }
+      // txHash is a hex string
+      // As with any RPC call, it may throw an error
+      const txHash = await ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [transactionParameters],
+      });
+      console.log(txHash);
+    }
+  };
 
   const columns: any[] = [
     {
@@ -106,6 +127,7 @@ function node(props: any) {
       dataIndex: 'totalCapacity',
       width: '20%',
       align: 'center',
+      render: (val: any) => <span>{val || 0} GB</span>,
     },
     {
       title: '任务量',
@@ -136,6 +158,7 @@ function node(props: any) {
       dataIndex: 'entrustedIncome',
       width: '20%',
       align: 'center',
+      render: (val: any) => <span>{val || 0}%</span>,
     },
     {
       title: '操作',
@@ -143,7 +166,9 @@ function node(props: any) {
       width: '20%',
       align: 'center',
       fixed: 'right',
-      render: () => <a onClick={(row) => entrust()}>委托</a>,
+      render: (key: string, row: object) => (
+        <a onClick={() => entrust(key, row)}>委托</a>
+      ),
     },
   ];
   const mergedColumns = columns.map((col) => {
@@ -167,6 +192,7 @@ function node(props: any) {
             columns={mergedColumns}
             rowClassName="editable-row"
             pagination={false}
+            loading={loading}
           />
         </div>
       </div>
