@@ -1,274 +1,280 @@
-import React, { Component, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './detail.less';
-import {
-  Table,
-  Input,
-  InputNumber,
-  Divider,
-  Form,
-  Typography,
-  Button,
-} from 'antd';
-import { Link, connect, ConnectProps, namespace_shop } from 'umi';
+import { Table, message, Pagination, Divider, Button } from 'antd';
+import { Link, connect, history, ConnectProps, namespace_shop } from 'umi';
 
-const MODELS_NAME = namespace_shop;
-
-import { Pagination } from 'antd';
+import axios from 'axios';
+import { get, post } from '@/utils/server';
+import { api } from '@/config/apis';
+const ethereum = window.ethereum;
 
 interface Item {
   key: string;
-  id: string;
-  size: string;
-  createdTime: string;
-  overTime: string;
+  totalCapacity: Number;
+  taskVolume: string;
+  Delegator: Number;
+  joinTime: string;
+  totalPledge: string;
+  entrustedIncome: Number;
 }
 
-interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
-  editing: boolean;
-  dataIndex: string;
-  title: any;
-  inputType: 'number' | 'text';
-  record: Item;
-  index: number;
-  children: React.ReactNode;
-}
+const originData: Item[] = [];
 
-const EditableCell: React.FC<EditableCellProps> = ({
-  editing,
-  dataIndex,
-  title,
-  inputType,
-  record,
-  index,
-  children,
-  ...restProps
-}) => {
-  const inputNode = inputType === 'number' ? <InputNumber /> : <Input />;
+const detail = (props: any) => {
+  const [publicKey, setPublicKey] = useState(props.location.query?.key || '');
+  const [detail, setDetail] = useState({
+    key: '',
+    totalCapacity: 0,
+    taskVolume: '',
+    latAddress: '',
+    Delegator: 0,
+    joinTime: '',
+    totalPledge: '',
+    entrustedIncome: 0,
+  });
+  const [dataList, setDataList] = useState(originData);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [hasNext, setHasNext] = useState(true);
+  const [tbH, setTbH] = useState(400);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    // 需要在 componentDidMount 執行的内容
+    // setPublicKey(props.location.query?.key||'')
+    console.log(window.navigator.userAgent.toLowerCase());
+    init();
+    // getList();
+    return () => {
+      // 需要在 componentWillUnmount 執行的内容
+    };
+  }, []);
+  useEffect(() => {
+    //監聽屏幕
+    // getTbH();
+    return () => {};
+  });
+  const getTbH = async () => {
+    const { navHeight, wHeight }: any = props;
+    const ph: any = document.querySelector('.upagination')?.clientHeight || 0;
+    const newTbH = wHeight - navHeight - ph - 240;
+    console.log(wHeight, navHeight, ph);
+    if (tbH !== newTbH) {
+      setTbH(newTbH);
+    }
+  };
 
+  const getList = async () => {
+    const originData: Item[] = [];
+    try {
+      if (!hasNext) return false;
+      let data: any = await get(api.storage.list, { skip: page });
+      setDataList(data.list);
+      setTotal(data.total);
+      if (data.total - page * 10 > 10) {
+        setPage(page + 1);
+        setHasNext(true);
+      } else {
+        setHasNext(false);
+      }
+      // setDataList((oldData)=>({
+      //   ...data.list
+      // }))
+    } catch (error: any) {
+      message.error(error);
+    }
+    // setDataList(originData);
+  };
+
+  const init = async () => {
+    try {
+      console.log(publicKey);
+      let data: any = await get(api.storage.detail, {
+        enclave_public_key: publicKey,
+      });
+      setDetail(data);
+      console.log(data);
+    } catch (error: any) {
+      message.error(error);
+    }
+  };
+
+  const entrust = async () => {
+    console.log(props.accountAddress);
+    if (!props.accountAddress) {
+      history.push('/login');
+    } else {
+      const selectedAddressHex = props.accountAddress;
+      const contractAddressHex = detail?.latAddress;
+      const data = {
+        enclave_public_key: detail.key,
+        amount: 0,
+      };
+      const transactionParameters = {
+        nonce: '0x00', // ignored by MetaMask
+        gasPrice: '0x4A817C800', // customizable by user during MetaMask confirmation.
+        gas: '0xF4240', // customizable by user during MetaMask confirmation.
+        to: contractAddressHex, // Required except during contract publications.
+        from: selectedAddressHex, // must match user's active address.
+        value: '0x00', // Only required to send ether to the recipient from the initiating external account.
+        data: detail.key, // Optional, but used for defining smart contract creation and interaction.
+        chainId: '210309', // Used to prevent transaction reuse across blockchains. Auto-filled by MetaMask.
+      };
+      console.log(transactionParameters);
+
+      // txHash is a hex string
+      // As with any RPC call, it may throw an error
+      const txHash = await ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [transactionParameters],
+      });
+      console.log(txHash);
+    }
+  };
+
+  const columns: any[] = [
+    {
+      title: '订单ID',
+      dataIndex: 'key',
+      width: '30%',
+      align: 'center', // 设置文本居中的属性
+      render: (key: any) => (
+        <Link to={`/storage/detail?key=${key}`} className="link">
+          {key}
+        </Link>
+      ),
+    },
+    {
+      title: '订单状态',
+      dataIndex: 'totalCapacity',
+      width: '20%',
+      align: 'center',
+    },
+    {
+      title: '创建时间',
+      dataIndex: 'joinTime',
+      width: '20%',
+      align: 'center',
+      render: (val: string) => <span>{val || '-'}</span>,
+    },
+    {
+      title: '有效期至',
+      dataIndex: 'totalPledge',
+      width: '20%',
+      align: 'center',
+      render: (val: string) => <span>{val || '-'}</span>,
+    },
+  ];
+  const mergedColumns = columns.map((col) => {
+    return {
+      ...col,
+      onCell: (record: Item) => ({
+        record,
+        // dataIndex: col.dataIndex,
+        title: col.title,
+      }),
+    };
+  });
   return (
-    <td {...restProps}>
-      {editing ? (
-        <Form.Item
-          name={dataIndex}
-          style={{ margin: 0 }}
-          rules={[
-            {
-              required: true,
-              message: `Please Input ${title}!`,
-            },
-          ]}
-        >
-          {inputNode}
-        </Form.Item>
-      ) : (
-        children
-      )}
-    </td>
+    <div className={styles.order}>
+      <div className={`max-body contain ${styles.contain}`}>
+        <div className="space"></div>
+
+        <div className={styles.title}>
+          订单详情: <span className={styles.title_val}>{publicKey}</span>
+        </div>
+
+        <div className="space"></div>
+
+        <div className={styles.txt_row}>
+          <div className={styles.txt_item}>
+            <div className={styles.txt_item_title}>发起人：</div>
+            <div className={styles.txt_item_val}>{detail.totalCapacity}</div>
+          </div>
+          <div className={styles.txt_item}>
+            <div className={styles.txt_item_title}>状态：</div>
+            <div className={styles.txt_item_val}>{detail.Delegator}</div>
+          </div>
+          <div className={styles.txt_item}>
+            <div className={styles.txt_item_title}>大小：</div>
+            <div className={styles.txt_item_val}>{detail.totalPledge} GB</div>
+          </div>
+        </div>
+        <div className={styles.txt_row}>
+          <div className={styles.txt_item}>
+            <div className={styles.txt_item_title}>价格：</div>
+            <div className={styles.txt_item_val}>
+              {detail.totalCapacity} DAT
+            </div>
+          </div>
+          <div className={styles.txt_item}>
+            <div className={styles.txt_item_title}>区块号：</div>
+            <div className={styles.txt_item_val}>{detail.Delegator}</div>
+          </div>
+          <div className={styles.txt_item}>
+            <div className={styles.txt_item_title}>区块数：</div>
+            <div className={styles.txt_item_val}>{detail.totalPledge}</div>
+          </div>
+        </div>
+        <div className={styles.txt_row}>
+          <div className={styles.txt_item}>
+            <div className={styles.txt_item_title}>到期区块：</div>
+            <div className={styles.txt_item_val}>{detail.totalCapacity}</div>
+          </div>
+          <div className={styles.txt_item}>
+            <div className={styles.txt_item_title}>预估时间：</div>
+            <div className={styles.txt_item_val}>{detail.Delegator}</div>
+          </div>
+          <div className={styles.txt_item}>
+            <div className={styles.txt_item_title}>订单结束时间：</div>
+            <div className={styles.txt_item_val}>{detail.totalPledge}</div>
+          </div>
+        </div>
+        <div className={styles.txt_row}>
+          <div className={styles.txt_item}>
+            <div className={styles.txt_item_title}>罚没：</div>
+            <div className={styles.txt_item_val}>{detail.totalCapacity}</div>
+          </div>
+          <div className={styles.txt_item}>
+            <div className={styles.txt_item_title}>奖励总额：</div>
+            <div className={styles.txt_item_val}>{detail.Delegator}</div>
+          </div>
+          <div className={styles.txt_item}>
+            <div className={styles.txt_item_title}>奖励余额：</div>
+            <div className={styles.txt_item_val}>{detail.totalPledge} DAT</div>
+          </div>
+        </div>
+
+        <div className="space"></div>
+
+        {/* <Divider style={{ color: '#f70d0dd9',margin: "40px 0" }} />
+        <div className="title">节点列表</div>
+        <div className="utable orderTable">
+          <Table
+            scroll={{ y: tbH }}
+            dataSource={dataList}
+            columns={mergedColumns}
+            rowClassName="editable-row"
+            pagination={false}
+          />
+        </div> */}
+      </div>
+      {/* <div className="max-body upagination">
+        <Pagination
+          total={total}
+          pageSize={10}
+          onChange={() => getList()}
+          showSizeChanger
+          showQuickJumper
+          showTotal={(total) => `共 ${total} 页`}
+        />
+      </div> */}
+    </div>
   );
 };
-
-type EditableTableProps = Parameters<typeof Table>[0];
-
-type propType = {
-  name: string;
-  number: number;
-};
-type EditableTableState = {
-  dataList: Array<Item>;
-  tbH: number;
-};
-
-class center extends Component<EditableTableProps, EditableTableState> {
-  constructor(props: EditableTableProps) {
-    super(props);
-
-    this.state = {
-      dataList: [],
-      tbH: 600, //table高度
-    };
-    this.getTbH.bind(this);
-    this.getList.bind(this);
-  }
-  componentDidMount() {
-    this.getList();
-  }
-  componentDidUpdate() {
-    this.getTbH();
-  }
-  async getTbH(): Promise<void> {
-    const { navHeight, wHeight }: any = this.props;
-    const ph: any = document.querySelector('.upagination')?.clientHeight || 0;
-    const tbH = wHeight - navHeight - ph - 240;
-    console.log(wHeight, navHeight, ph);
-    if (this.state.tbH !== tbH) {
-      this.setState({ tbH: tbH });
-      console.log('哈哈');
-    }
-  }
-
-  getList = () => {
-    const originData: Item[] = [];
-    console.log(originData);
-    for (let i = 0; i < 50; i++) {
-      originData.push({
-        key: i.toString(),
-        id: 'oxf88ce5fd607d7a27f21c3d06d3dwefwf7383249912' + i,
-        size: '3.2GB',
-        createdTime: '2021-12-28  12:23:55',
-        overTime: '2021-12-28  12:23:55',
-      });
-    }
-    this.setState({
-      dataList: originData,
-    });
-  };
-  render() {
-    const { dataList, tbH } = this.state;
-
-    const columns: any[] = [
-      {
-        title: '订单ID',
-        dataIndex: 'id',
-        width: '30%',
-        editable: true,
-        align: 'center', // 设置文本居中的属性
-        render: (id: any) => (
-          <Link to={`/orderDetail?id=${id}`} className="link">
-            {id}
-          </Link>
-        ),
-      },
-      {
-        title: '文件大小',
-        dataIndex: 'size',
-        width: '20%',
-        editable: true,
-        align: 'center',
-      },
-      {
-        title: '创建时间',
-        dataIndex: 'createdTime',
-        width: '20%',
-        editable: true,
-        align: 'center',
-      },
-      {
-        title: '有效期至',
-        dataIndex: 'overTime',
-        width: '20%',
-        editable: true,
-        align: 'center',
-      },
-    ];
-
-    const mergedColumns = columns.map((col) => {
-      return {
-        ...col,
-        onCell: (record: Item) => ({
-          record,
-          // dataIndex: col.dataIndex,
-          title: col.title,
-        }),
-      };
-    });
-    return (
-      <div className={styles.order}>
-        <div className={`max-body contain ${styles.contain}`}>
-          <div className={styles.txt_row}>
-            <div className={styles.txt_item}>
-              <div className={styles.txt_item_title}>发起人：</div>
-              <div className={styles.txt_item_val}>
-                lat249hsdfsdf38223423454854273ncndsg
-              </div>
-            </div>
-            <div className={styles.txt_item}>
-              <div className={styles.txt_item_title}>状态</div>
-              <div className={styles.txt_item_val}>关闭</div>
-            </div>
-            <div className={styles.txt_item}>
-              <div className={styles.txt_item_title}>大小</div>
-              <div className={styles.txt_item_val}>50KB</div>
-            </div>
-          </div>
-          <div className={styles.txt_row}>
-            <div className={styles.txt_item}>
-              <div className={styles.txt_item_title}>发起人：</div>
-              <div className={styles.txt_item_val}>
-                lat249hsdfsdf38223423454854273ncndsg
-              </div>
-            </div>
-            <div className={styles.txt_item}>
-              <div className={styles.txt_item_title}>状态</div>
-              <div className={styles.txt_item_val}>关闭</div>
-            </div>
-            <div className={styles.txt_item}>
-              <div className={styles.txt_item_title}>大小</div>
-              <div className={styles.txt_item_val}>50KB</div>
-            </div>
-          </div>
-          <div className={styles.txt_row}>
-            <div className={styles.txt_item}>
-              <div className={styles.txt_item_title}>发起人：</div>
-              <div className={styles.txt_item_val}>
-                lat249hsdfsdf38223423454854273ncndsg
-              </div>
-            </div>
-            <div className={styles.txt_item}>
-              <div className={styles.txt_item_title}>状态</div>
-              <div className={styles.txt_item_val}>关闭</div>
-            </div>
-            <div className={styles.txt_item}>
-              <div className={styles.txt_item_title}>大小</div>
-              <div className={styles.txt_item_val}>50KB</div>
-            </div>
-          </div>
-          <div className={styles.txt_row}>
-            <div className={styles.txt_item}>
-              <div className={styles.txt_item_title}>发起人：</div>
-              <div className={styles.txt_item_val}>
-                lat249hsdfsdf38223423454854273ncndsg
-              </div>
-            </div>
-            <div className={styles.txt_item}>
-              <div className={styles.txt_item_title}>状态</div>
-              <div className={styles.txt_item_val}>关闭</div>
-            </div>
-            <div className={styles.txt_item}>
-              <div className={styles.txt_item_title}>大小</div>
-              <div className={styles.txt_item_val}>50KB</div>
-            </div>
-          </div>
-
-          <Divider style={{ color: '#f70d0dd9' }} />
-          <div className="title">节点列表</div>
-          <div className="utable orderTable">
-            <Table
-              scroll={{ y: tbH }}
-              dataSource={dataList}
-              columns={mergedColumns}
-              rowClassName="editable-row"
-              pagination={false}
-            />
-          </div>
-        </div>
-        <div className="max-body upagination">
-          <Pagination
-            total={dataList.length}
-            pageSize={10}
-            onChange={() => this.getList()}
-            showSizeChanger
-            showQuickJumper
-            showTotal={(total) => `共 ${total} 页`}
-          />
-        </div>
-      </div>
-    );
-  }
-}
 export default connect((state: any) => {
   return {
-    ...state[MODELS_NAME],
+    ...state['storage'],
     ...state['common'],
     // loading: state.loading.models[MODELS_NAME]
   };
-})(center);
+})(detail);

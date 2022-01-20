@@ -1,47 +1,74 @@
 import React, { useState, useEffect } from 'react';
 import styles from './detail.less';
-import { Table, message, Pagination, Divider, Button } from 'antd';
+import {
+  Table,
+  Modal,
+  Form,
+  Input,
+  message,
+  Pagination,
+  Divider,
+  Button,
+  Tooltip,
+} from 'antd';
 import { Link, connect, history, ConnectProps, namespace_shop } from 'umi';
 
 import axios from 'axios';
 import { get, post } from '@/utils/server';
 import { api } from '@/config/apis';
+import { config } from '@/config';
 const ethereum = window.ethereum;
+// var Web3 = require("web3");
+// let web3 = new Web3(new Web3.providers.HttpProvider(testNetwork));
 
 interface Item {
   key: string;
   totalCapacity: Number;
   taskVolume: string;
+  latAddress: string; //将enclave公钥转换为lat格式的地址
+  rewardAddress: string; //接收奖励的矿工地址
+  senderAddress: string; //发送事务的矿工地址
+  senderAddressHex: string;
   Delegator: Number;
   joinTime: string;
   totalPledge: string;
   entrustedIncome: Number;
+  total_miner_reward: Number;
+  total_staker_reward: Number;
 }
 
 const originData: Item[] = [];
 
 const detail = (props: any) => {
+  const [form] = Form.useForm();
   const [publicKey, setPublicKey] = useState(props.location.query?.key || '');
   const [detail, setDetail] = useState({
     key: '',
     totalCapacity: 0,
     taskVolume: '',
-    latAddress: '',
     Delegator: 0,
     joinTime: '',
+    latAddress: '', //将enclave公钥转换为lat格式的地址
+    rewardAddress: '', //接收奖励的矿工地址
+    senderAddress: '', //发送事务的矿工地址
+    senderAddressHex: '',
     totalPledge: '',
     entrustedIncome: 0,
+    total_miner_reward: 0,
+    total_staker_reward: 0,
   });
+  const [DATBalance, setDATBalance] = useState(0);
   const [dataList, setDataList] = useState(originData);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [hasNext, setHasNext] = useState(true);
   const [tbH, setTbH] = useState(400);
   const [loading, setLoading] = useState(true);
+  const [tradeModel, setTradeModel] = useState(false);
   useEffect(() => {
     // 需要在 componentDidMount 執行的内容
     // setPublicKey(props.location.query?.key||'')
-    console.log(window.navigator.userAgent.toLowerCase());
+
     init();
     getList();
     return () => {
@@ -53,6 +80,16 @@ const detail = (props: any) => {
     // getTbH();
     return () => {};
   });
+
+  const refreshBalance = async () => {
+    const balance = await ethereum.request({
+      method: 'eth_getBalance',
+      params: [ethereum.selectedAddress, 'latest'],
+      id: 1,
+    });
+    setDATBalance(parseInt(balance) / config.UNIT);
+  };
+
   const getTbH = async () => {
     const { navHeight, wHeight }: any = props;
     const ph: any = document.querySelector('.upagination')?.clientHeight || 0;
@@ -67,7 +104,9 @@ const detail = (props: any) => {
     const originData: Item[] = [];
     try {
       if (!hasNext) return false;
-      let data: any = await get(api.storage.list, { skip: page });
+      let data: any = await get(api.storage.minerlist, {
+        enclave_public_key: publicKey,
+      });
       setDataList(data.list);
       setTotal(data.total);
       if (data.total - page * 10 > 10) {
@@ -99,36 +138,60 @@ const detail = (props: any) => {
   };
 
   const entrust = async () => {
-    console.log(props.accountAddress);
     if (!props.accountAddress) {
       history.push('/login');
     } else {
-      const selectedAddressHex = props.accountAddress;
-      const contractAddressHex = detail?.latAddress;
-      const data = {
-        enclave_public_key: detail.key,
-        amount: 0,
-      };
-      const transactionParameters = {
-        nonce: '0x00', // ignored by MetaMask
-        gasPrice: '0x4A817C800', // customizable by user during MetaMask confirmation.
-        gas: '0xF4240', // customizable by user during MetaMask confirmation.
-        to: contractAddressHex, // Required except during contract publications.
-        from: selectedAddressHex, // must match user's active address.
-        value: '0x00', // Only required to send ether to the recipient from the initiating external account.
-        data: detail.key, // Optional, but used for defining smart contract creation and interaction.
-        chainId: '210309', // Used to prevent transaction reuse across blockchains. Auto-filled by MetaMask.
-      };
-      console.log(transactionParameters);
-
-      // txHash is a hex string
-      // As with any RPC call, it may throw an error
-      const txHash = await ethereum.request({
-        method: 'eth_sendTransaction',
-        params: [transactionParameters],
-      });
-      console.log(txHash);
+      await refreshBalance();
+      await setTradeModel(true);
     }
+  };
+
+  const comfirmTrade = () => {
+    //校验数量
+    form
+      .validateFields()
+      .then((values) => {
+        entrusting(values.count);
+        setTradeModel(false);
+      })
+      .catch((errorInfo) => {});
+  };
+
+  const hideModal = () => {
+    setTradeModel(false);
+  };
+
+  const entrusting = async (count: Number) => {
+    const selectedAddressHex = props.accountAddress;
+    const contractAddressHex = detail?.senderAddressHex;
+
+    const data = await get(api.storage.convertHexadecimal, {
+      contractAddress: detail?.senderAddress,
+      rewardAddress: detail?.rewardAddress,
+      amount: count, //数量
+    });
+
+    console.log(data);
+
+    const transactionParameters = {
+      nonce: '0x00', // ignored by MetaMask
+      gasPrice: '0x4A817C800', // customizable by user during MetaMask confirmation.
+      gas: '0xF4240', // customizable by user during MetaMask confirmation.
+      to: contractAddressHex, // Required except during contract publications.
+      from: selectedAddressHex, // must match user's active address.
+      value: '0x00', // Only required to send ether to the recipient from the initiating external account.
+      data: data, // Optional, but used for defining smart contract creation and interaction.
+      chainId: '210309', // Used to prevent transaction reuse across blockchains. Auto-filled by MetaMask.
+    };
+    console.log(transactionParameters);
+
+    // txHash is a hex string
+    // As with any RPC call, it may throw an error
+    const txHash = await ethereum.request({
+      method: 'eth_sendTransaction',
+      params: [transactionParameters],
+    });
+    console.log(txHash);
   };
 
   const columns: any[] = [
@@ -139,7 +202,13 @@ const detail = (props: any) => {
       align: 'center', // 设置文本居中的属性
       render: (key: any) => (
         <Link to={`/storage/detail?key=${key}`} className="link">
-          {key}
+          <Tooltip placement="bottom" title={key}>
+            <span>
+              {key.slice(0, 15) +
+                '...' +
+                key.slice(key.toString().length - 15, key.toString().length)}
+            </span>
+          </Tooltip>
         </Link>
       ),
     },
@@ -164,6 +233,14 @@ const detail = (props: any) => {
       render: (val: string) => <span>{val || '-'}</span>,
     },
   ];
+  const onFinish = (values: any) => {
+    console.log('Success:', values);
+  };
+
+  const onFinishFailed = (errorInfo: any) => {
+    console.log('Failed:', errorInfo);
+  };
+
   const mergedColumns = columns.map((col) => {
     return {
       ...col,
@@ -180,7 +257,17 @@ const detail = (props: any) => {
         <div className="space"></div>
 
         <div className={styles.title}>
-          节点ID: <span className={styles.title_val}>{publicKey}</span>
+          节点ID:
+          <Tooltip placement="bottom" title={publicKey}>
+            <span className={styles.title_val}>
+              {publicKey.slice(0, 15) +
+                '...' +
+                publicKey.slice(
+                  publicKey.toString().length - 15,
+                  publicKey.toString().length,
+                )}
+            </span>
+          </Tooltip>
           <Button
             className="btn_ori"
             type="primary"
@@ -199,7 +286,7 @@ const detail = (props: any) => {
             <div className={styles.txt_item_val}>{detail.totalCapacity} GB</div>
           </div>
           <div className={styles.txt_item}>
-            <div className={styles.txt_item_title}>委托数量：</div>
+            <div className={styles.txt_item_title}>委托者数量:</div>
             <div className={styles.txt_item_val}>{detail.Delegator}</div>
           </div>
           <div className={styles.txt_item}>
@@ -225,8 +312,10 @@ const detail = (props: any) => {
 
         <div className={styles.txt_row}>
           <div className={styles.txt_item}>
-            <div className={styles.txt_item_title}>未领取的节点奖励：</div>
-            <div className={styles.txt_item_val}>18.23 DAT</div>
+            <div className={styles.txt_item_title}>节点奖励：</div>
+            <div className={styles.txt_item_val}>
+              {detail.total_miner_reward || '0'} DAT
+            </div>
           </div>
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>预估节点年化收益：</div>
@@ -239,8 +328,10 @@ const detail = (props: any) => {
         </div>
         <div className={styles.txt_row}>
           <div className={styles.txt_item}>
-            <div className={styles.txt_item_title}>未领取的总委托奖励：</div>
-            <div className={styles.txt_item_val}>18.23 DAT</div>
+            <div className={styles.txt_item_title}>委托奖励：</div>
+            <div className={styles.txt_item_val}>
+              {detail.total_staker_reward || '0'} DAT
+            </div>
           </div>
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>预估委托年化收益：</div>
@@ -250,7 +341,7 @@ const detail = (props: any) => {
         </div>
 
         <Divider style={{ color: '#f70d0dd9', margin: '40px 0' }} />
-        <div className="title">节点列表</div>
+        <div className="title">存储订单列表</div>
         <div className="utable orderTable">
           <Table
             scroll={{ y: tbH }}
@@ -271,6 +362,47 @@ const detail = (props: any) => {
           showTotal={(total) => `共 ${total} 页`}
         />
       </div>
+      <Modal
+        title={`余额：${DATBalance}`}
+        visible={tradeModel}
+        onOk={comfirmTrade}
+        onCancel={hideModal}
+        okText="确认"
+        cancelText="取消"
+      >
+        <Form
+          name="basic"
+          form={form}
+          initialValues={{ remember: true }}
+          onFinish={onFinish}
+          onFinishFailed={onFinishFailed}
+          autoComplete="off"
+        >
+          <Form.Item
+            label="委托数量"
+            name="count"
+            rules={[
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (value) {
+                    if (value > DATBalance) {
+                      return Promise.reject(
+                        new Error('委托数量不能超过账户余额!'),
+                      );
+                    } else {
+                      return Promise.resolve();
+                    }
+                  } else {
+                    return Promise.reject(new Error('请输入委托数量!'));
+                  }
+                },
+              }),
+            ]}
+          >
+            <Input placeholder="请输入委托数量" />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };

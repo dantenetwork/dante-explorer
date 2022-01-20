@@ -5,6 +5,14 @@ export const api = {
   storage: {
     list: '/storage/list',
     detail: '/storage/detail',
-    orderList: '/storage/orderList',
+    orderReward: '/storage/reward',
+    minerlist: '/storage/minerlist',
+    convertHexadecimal: '/storage/convertHexadecimal',
+  },
+  center: {
+    stakeList: '/canter/stake_list',
+    stakeReward: '/canter/stake_reward',
+    unstake: '/canter/unstake',
+    fileList: '/canter/file_list',
   },
 };
