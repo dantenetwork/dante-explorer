@@ -11,5 +11,6 @@ $ yarn
 Start the dev server,
 
 ```bash
+$ yarn install    if failed  npm install
 $ yarn start
 ```
