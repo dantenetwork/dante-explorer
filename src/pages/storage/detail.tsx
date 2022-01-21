@@ -164,36 +164,64 @@ const detail = (props: any) => {
   const entrusting = async (count: Number) => {
     const selectedAddressHex = props.accountAddress;
     // const contractAddressHex = detail?.senderAddressHex;
-    const contractAddressHex = '0x82e8570169703a6eacbb7e7f619b6bb1059608fb';
+    const tokenContractAddressHex =
+      '0xaab2110f01c41b9fb05b6472fa6c5c1c8f259abb';
+    const verifyContractAddressHex =
+      '0x82e8570169703a6eacbb7e7f619b6bb1059608fb';
+
+    const tokenApproveData =
+      '0xe8883814b7fd4428590c9482e8570169703a6eacbb7e7f619b6bb1059608fb89056bc75e2d63100000';
+
+    const approveTokenParameters = {
+      nonce: '0x00', // ignored by MetaMask
+      gasPrice: '0x4A817C800', // customizable by user during MetaMask confirmation.
+      gas: '0xF4240', // customizable by user during MetaMask confirmation.
+      to: tokenContractAddressHex, // Required except during contract publications.
+      from: selectedAddressHex, // must match user's active address.
+      value: '0x00', // Only required to send ether to the recipient from the initiating external account.
+      data: tokenApproveData, // Optional, but used for defining smart contract creation and interaction.
+      chainId: '210309', // Used to prevent transaction reuse across blockchains. Auto-filled by MetaMask.
+    };
+    console.log(approveTokenParameters);
+
     // const data = await get(api.storage.convertHexadecimal, {
     //   contractAddress: detail?.senderAddress,
     //   rewardAddress: detail?.rewardAddress,
     //   amount: count, //数量
     // });
-    const data =
+    const stakeTokenData =
       '0xf89688a6e7356e85fe65cfb88230343734633465636461386435323861356164663238313062323763313734626531376338366532363361303939386633383061343266346132656233353066633534666233343131343661363330356261343336626339333334303266393836386430313333386163633761626438313835346332386231343738316237386131880de0b6b3a7640000';
 
-    console.log(data);
-
-    const transactionParameters = {
+    const stakeTokenParameters = {
       nonce: '0x00', // ignored by MetaMask
       gasPrice: '0x4A817C800', // customizable by user during MetaMask confirmation.
       gas: '0xF4240', // customizable by user during MetaMask confirmation.
-      to: contractAddressHex, // Required except during contract publications.
+      to: verifyContractAddressHex, // Required except during contract publications.
       from: selectedAddressHex, // must match user's active address.
       value: '0x00', // Only required to send ether to the recipient from the initiating external account.
-      data: data, // Optional, but used for defining smart contract creation and interaction.
+      data: stakeTokenData, // Optional, but used for defining smart contract creation and interaction.
       chainId: '210309', // Used to prevent transaction reuse across blockchains. Auto-filled by MetaMask.
     };
-    console.log(transactionParameters);
+    console.log(stakeTokenParameters);
 
+    // send approve transaction
     // txHash is a hex string
     // As with any RPC call, it may throw an error
-    const txHash = await ethereum.request({
+    const approveTxHash = await ethereum.request({
       method: 'eth_sendTransaction',
-      params: [transactionParameters],
+      params: [approveTokenParameters],
     });
-    console.log(txHash);
+    console.log(approveTxHash);
+
+    // send stake token transaction
+
+    setTimeout(async function () {
+      const stakeTxHash = await ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [stakeTokenParameters],
+      });
+      console.log(stakeTxHash);
+    }, 3000);
   };
 
   const columns: any[] = [
