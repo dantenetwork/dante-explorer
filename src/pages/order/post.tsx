@@ -132,10 +132,10 @@ function canter(props: any) {
     } else {
       let data = await get(api.order.addDeal, {
         cid: orderQuery.cid,
-        size: orderQuery.cid,
-        price: values.price,
-        duration: values.duration,
-        miner_required: values.miner_required,
+        size: Number(orderQuery.size),
+        price: Number(values.price),
+        duration: Number(values.duration),
+        miner_required: Number(values.miner_required),
       });
       console.log(data);
     }

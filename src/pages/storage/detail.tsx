@@ -82,12 +82,16 @@ const detail = (props: any) => {
   });
 
   const refreshBalance = async () => {
-    const balance = await ethereum.request({
-      method: 'eth_getBalance',
-      params: [ethereum.selectedAddress, 'latest'],
-      id: 1,
+    const balance = await get(api.balance, {
+      selectedAddress: ethereum.selectedAddress,
     });
-    setDATBalance(parseInt(balance) / config.UNIT);
+
+    // const balance = await ethereum.request({
+    //   method: 'eth_getBalance',
+    //   params: [ethereum.selectedAddress, 'latest'],
+    //   id: 1,
+    // });
+    setDATBalance(Number(balance) / config.UNIT);
   };
 
   const getTbH = async () => {
@@ -152,26 +156,35 @@ const detail = (props: any) => {
       .validateFields()
       .then((values) => {
         entrusting(values.count);
-        setTradeModel(false);
+        hideModal();
       })
       .catch((errorInfo) => {});
   };
 
   const hideModal = () => {
     setTradeModel(false);
+    form.resetFields();
   };
 
   const entrusting = async (count: Number) => {
+    const newConfig: any = await get('/config');
+    console.log('666666666', newConfig);
     const selectedAddressHex = props.accountAddress;
     // const contractAddressHex = detail?.senderAddressHex;
-    const tokenContractAddressHex =
-      '0xaab2110f01c41b9fb05b6472fa6c5c1c8f259abb';
-    const verifyContractAddressHex =
-      '0x82e8570169703a6eacbb7e7f619b6bb1059608fb';
 
-    const tokenApproveData =
-      '0xe8883814b7fd4428590c9482e8570169703a6eacbb7e7f619b6bb1059608fb89056bc75e2d63100000';
+    const tokenContractAddressHex = newConfig.tokenContractAddressHex;
+    // '0xaab2110f01c41b9fb05b6472fa6c5c1c8f259abb';
 
+    const verifyContractAddressHex = newConfig.verifyContractAddressHex;
+    // '0x82e8570169703a6eacbb7e7f619b6bb1059608fb';
+
+    const tokenApproveData = await get(api.storage.encodeTokenApprove, {
+      amount: Number(count),
+    });
+    // '0xe8883814b7fd4428590c9482e8570169703a6eacbb7e7f619b6bb1059608fb89056bc75e2d63100000';
+    // '0xdf883814b7fd4428590c9482e8570169703a6eacbb7e7f619b6bb1059608fb02
+    console.log(tokenApproveData);
+    // return false
     const approveTokenParameters = {
       nonce: '0x00', // ignored by MetaMask
       gasPrice: '0x4A817C800', // customizable by user during MetaMask confirmation.
@@ -189,9 +202,12 @@ const detail = (props: any) => {
     //   rewardAddress: detail?.rewardAddress,
     //   amount: count, //数量
     // });
-    const stakeTokenData =
-      '0xf89688a6e7356e85fe65cfb88230343734633465636461386435323861356164663238313062323763313734626531376338366532363361303939386633383061343266346132656233353066633534666233343131343661363330356261343336626339333334303266393836386430313333386163633761626438313835346332386231343738316237386131880de0b6b3a7640000';
-
+    const stakeTokenData = await get(api.storage.encodeStakeToken, {
+      enclave_public_key: publicKey,
+      amount: Number(count),
+    });
+    // '0xf89688a6e7356e85fe65cfb88230343734633465636461386435323861356164663238313062323763313734626531376338366532363361303939386633383061343266346132656233353066633534666233343131343661363330356261343336626339333334303266393836386430313333386163633761626438313835346332386231343738316237386131880de0b6b3a7640000';
+    console.log('stakeTokenData：', stakeTokenData);
     const stakeTokenParameters = {
       nonce: '0x00', // ignored by MetaMask
       gasPrice: '0x4A817C800', // customizable by user during MetaMask confirmation.
@@ -221,7 +237,7 @@ const detail = (props: any) => {
         params: [stakeTokenParameters],
       });
       console.log(stakeTxHash);
-    }, 3000);
+    }, 2000);
   };
 
   const columns: any[] = [

@@ -11,6 +11,8 @@ export const api = {
     orderReward: '/storage/reward',
     minerlist: '/storage/minerlist',
     convertHexadecimal: '/storage/convertHexadecimal',
+    encodeTokenApprove: '/storage/encode_token_approve',
+    encodeStakeToken: '/storage/encode_stake_token',
   },
   order: {
     addDeal: '/add_deal',
@@ -21,4 +23,6 @@ export const api = {
     unstake: '/canter/unstake',
     fileList: '/canter/file_list',
   },
+  balance: '/balance',
+  config: '/config',
 };
