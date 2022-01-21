@@ -9,7 +9,7 @@ export default defineConfig({
     type: 'none',
   },
   links: [{ rel: 'shortcut icon', href: 'favicon.ico' }],
-  favicon: 'favicon.ico',
+  favicon: '/favicon.ico',
   dynamicImport: {
     loading: '@/Loading',
   },

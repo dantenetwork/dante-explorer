@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import styles from './center.less';
 // import './node.css'
 import { Table, Button, Divider, message, Pagination } from 'antd';
-import { Link, connect, ConnectProps, namespace_shop } from 'umi';
-
+import { Link, connect, history, ConnectProps, namespace_shop } from 'umi';
+import { config } from '@/config';
 import axios from 'axios';
 import { get, post } from '@/utils/server';
 import { api } from '@/config/apis';
@@ -23,7 +23,7 @@ const originData: Item[] = [];
 
 function canter(props: any) {
   const [stakeList, setStakeList] = useState(originData);
-
+  const [DATBalance, setDATBalance] = useState(0);
   const [fileList, setFileList] = useState(originData);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -44,6 +44,7 @@ function canter(props: any) {
   useEffect(() => {
     // 需要在 componentDidMount 執行的内容
     init();
+    refreshBalance();
     getFileList();
     getStakeList();
     // getFileList()
@@ -51,6 +52,15 @@ function canter(props: any) {
       // 需要在 componentWillUnmount 執行的内容
     };
   }, []);
+
+  const refreshBalance = async () => {
+    const balance = await ethereum.request({
+      method: 'eth_getBalance',
+      params: [ethereum.selectedAddress, 'latest'],
+      id: 1,
+    });
+    setDATBalance(parseInt(balance) / config.UNIT);
+  };
 
   const init = async () => {
     console.log(ethereum);
@@ -61,8 +71,13 @@ function canter(props: any) {
       setDetail(data);
       console.log(data);
     } catch (error: any) {
-      message.error(error);
+      console.log(error);
+      // message.error(error);
     }
+  };
+
+  const creadOrder = async () => {
+    history.push('/order/post');
   };
 
   const getStakeList = async () => {
@@ -187,7 +202,7 @@ function canter(props: any) {
               PlatON
             </div>
             <div className={`${styles.txt_item_val} ${styles.me}`}>
-              104.89 DAT
+              {DATBalance} DAT
             </div>
           </div>
           <div className={styles.txt_item}>
@@ -219,7 +234,12 @@ function canter(props: any) {
         <Divider style={{ color: '#f70d0dd9' }} />
         <div className="title">
           文件列表
-          <Button className="btn_ori" type="primary" shape="round">
+          <Button
+            className="btn_ori"
+            onClick={() => creadOrder()}
+            type="primary"
+            shape="round"
+          >
             上传文件
           </Button>
         </div>

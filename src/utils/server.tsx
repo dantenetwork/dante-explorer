@@ -52,8 +52,12 @@ export function get(url: string, params = {}) {
         params: params,
       })
       .then((response) => {
-        landing(url, params, response.data);
-        resolve(response.data);
+        if (response) {
+          landing(url, params, response?.data);
+          resolve(response?.data);
+        } else {
+          reject('request error');
+        }
       })
       .catch((error) => {
         reject(error);
@@ -73,7 +77,11 @@ export function post(url: string, data: any) {
     axios.post(url, data).then(
       (response) => {
         //关闭进度条
-        resolve(response.data);
+        if (response) {
+          resolve(response?.data);
+        } else {
+          reject('request error');
+        }
       },
       (err) => {
         reject(err);
@@ -92,7 +100,11 @@ export function patch(url: string, data = {}) {
   return new Promise((resolve, reject) => {
     axios.patch(url, data).then(
       (response) => {
-        resolve(response.data);
+        if (response) {
+          resolve(response?.data);
+        } else {
+          reject('request error');
+        }
       },
       (err) => {
         msag(err);
@@ -113,7 +125,11 @@ export function put(url: string, data = {}) {
   return new Promise((resolve, reject) => {
     axios.put(url, data).then(
       (response) => {
-        resolve(response.data);
+        if (response) {
+          resolve(response?.data);
+        } else {
+          reject('request error');
+        }
       },
       (err) => {
         msag(err);

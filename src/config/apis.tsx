@@ -1,4 +1,7 @@
 export const api = {
+  common: {
+    uploadFile: '/uploadFile',
+  },
   home: {
     global_info: '/global_info',
   },
@@ -8,6 +11,9 @@ export const api = {
     orderReward: '/storage/reward',
     minerlist: '/storage/minerlist',
     convertHexadecimal: '/storage/convertHexadecimal',
+  },
+  order: {
+    addDeal: '/add_deal',
   },
   center: {
     stakeList: '/canter/stake_list',

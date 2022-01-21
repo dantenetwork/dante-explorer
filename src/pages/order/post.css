@@ -8,7 +8,8 @@
   content: "";
 }
 .postForm .items,.postForm .title{
-  margin-bottom: 50px;
+  min-height: 60px;
+  margin-bottom: 24px;
 }
 .postForm .items label{
   font-size: 16px;
@@ -16,6 +17,18 @@
   font-weight: 400;
   color: #12164A;
 
+}
+.postForm .items.required label::before{
+  content: '*';
+  position: relative;
+  top: -0.5px;
+  margin: 0 8px 0 2px;
+  display: inline-block;
+  margin-right: 4px;
+  color: #ff4d4f;
+  font-size: 14px;
+  font-family: SimSun, sans-serif;
+  line-height: 1;
 }
 .postForm .ant-form-item-control{
   margin-left: 25px;
@@ -41,6 +54,7 @@
   background: #F5F8FB;
   border: 1px solid rgba(72, 94, 127, 0.1);
   border-radius: 4px;
+  width: 180px;
 }
 .postForm .btn .ant-form-item-control{
   margin-left: auto;
