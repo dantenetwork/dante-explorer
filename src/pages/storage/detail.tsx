@@ -163,13 +163,15 @@ const detail = (props: any) => {
 
   const entrusting = async (count: Number) => {
     const selectedAddressHex = props.accountAddress;
-    const contractAddressHex = detail?.senderAddressHex;
-
-    const data = await get(api.storage.convertHexadecimal, {
-      contractAddress: detail?.senderAddress,
-      rewardAddress: detail?.rewardAddress,
-      amount: count, //数量
-    });
+    // const contractAddressHex = detail?.senderAddressHex;
+    const contractAddressHex = '0x82e8570169703a6eacbb7e7f619b6bb1059608fb';
+    // const data = await get(api.storage.convertHexadecimal, {
+    //   contractAddress: detail?.senderAddress,
+    //   rewardAddress: detail?.rewardAddress,
+    //   amount: count, //数量
+    // });
+    const data =
+      '0xf89688a6e7356e85fe65cfb88230343734633465636461386435323861356164663238313062323763313734626531376338366532363361303939386633383061343266346132656233353066633534666233343131343661363330356261343336626339333334303266393836386430313333386163633761626438313835346332386231343738316237386131880de0b6b3a7640000';
 
     console.log(data);
 
