@@ -2,16 +2,14 @@ import React, { useState, useEffect } from 'react';
 import styles from './node.less';
 // import './node.css'
 import { Table, Modal, Form, Input, message, Pagination, Tooltip } from 'antd';
-import { Link, connect, history, ConnectProps, namespace_shop } from 'umi';
+import { Link, connect, history, ConnectProps } from 'umi';
 
 import axios from 'axios';
 import { get, post } from '@/utils/server';
 import { api } from '@/config/apis';
 import { config } from '@/config';
 const ethereum = window.ethereum;
-const MODELS_NAME = namespace_shop;
-console.log(namespace_shop);
-
+const { utils, BigNumber } = require('ethers');
 interface Item {
   key: string;
   totalCapacity: Number;
@@ -104,14 +102,7 @@ function node(props: any) {
     const balance = await get(api.balance, {
       selectedAddress: ethereum.selectedAddress,
     });
-
-    // const balance = await ethereum.request({
-    //   method: 'eth_getBalance',
-    //   params: [ethereum.selectedAddress, 'latest'],
-    //   id: 1,
-    // });
-    // setDATBalance(parseInt(balance) / config.UNIT);
-    setDATBalance(Number(balance) / config.UNIT);
+    setDATBalance(utils.formatUnits(balance || '0', 18));
   };
   const entrust = async (key: string, row: any) => {
     setSelectRow(row);
@@ -175,7 +166,7 @@ function node(props: any) {
     //   amount: count, //数量
     // });
     const stakeTokenData = await get(api.storage.encodeStakeToken, {
-      enclave_public_key: publicKey,
+      enclave_public_key: selectRow.key,
       amount: Number(count),
     });
     // '0xf89688a6e7356e85fe65cfb88230343734633465636461386435323861356164663238313062323763313734626531376338366532363361303939386633383061343266346132656233353066633534666233343131343661363330356261343336626339333334303266393836386430313333386163633761626438313835346332386231343738316237386131880de0b6b3a7640000';

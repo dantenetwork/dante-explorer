@@ -62,7 +62,7 @@ export default defineConfig({
   fastRefresh: {}, //快速刷新
   // proxy: {//代理
   //   '/api': {
-  //     'target': 'http://jsonplaceholder.typicode.com/',
+  //     'target': 'http://172.20.14.197:8081',
   //     'changeOrigin': true,
   //     'pathRewrite': { '^/api' : '' },
   //   },

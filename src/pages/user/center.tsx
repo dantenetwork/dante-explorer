@@ -2,14 +2,13 @@ import React, { useState, useEffect } from 'react';
 import styles from './center.less';
 // import './node.css'
 import { Table, Button, Divider, message, Pagination } from 'antd';
-import { Link, connect, history, ConnectProps, namespace_shop } from 'umi';
+import { Link, connect, history, ConnectProps } from 'umi';
 import { config } from '@/config';
 import axios from 'axios';
 import { get, post } from '@/utils/server';
 import { api } from '@/config/apis';
 const ethereum = window.ethereum;
-const MODELS_NAME = namespace_shop;
-console.log(namespace_shop);
+const { utils, BigNumber } = require('ethers');
 
 interface Item {
   key: string;
@@ -54,12 +53,15 @@ function canter(props: any) {
   }, []);
 
   const refreshBalance = async () => {
-    const balance = await ethereum.request({
-      method: 'eth_getBalance',
-      params: [ethereum.selectedAddress, 'latest'],
-      id: 1,
+    const balance = await get(api.balance, {
+      selectedAddress: ethereum.selectedAddress,
     });
-    setDATBalance(parseInt(balance) / config.UNIT);
+    // const balance = await ethereum.request({
+    //   method: 'eth_getBalance',
+    //   params: [ethereum.selectedAddress, 'latest'],
+    //   id: 1,
+    // });
+    setDATBalance(utils.formatUnits(balance || '0', 18));
   };
 
   const init = async () => {

@@ -22,7 +22,6 @@ function Home(props: any) {
   }, []);
 
   const init = async () => {
-    console.log(config.UNIT);
     try {
       let data: any = await get(api.home.global_info);
       setData((oldData) => ({

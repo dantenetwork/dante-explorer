@@ -17,6 +17,7 @@ import axios from 'axios';
 import { get, post } from '@/utils/server';
 import { api } from '@/config/apis';
 import { config } from '@/config';
+const { utils, BigNumber } = require('ethers');
 const ethereum = window.ethereum;
 // var Web3 = require("web3");
 // let web3 = new Web3(new Web3.providers.HttpProvider(testNetwork));
@@ -71,6 +72,7 @@ const detail = (props: any) => {
 
     init();
     getList();
+    refreshBalance();
     return () => {
       // 需要在 componentWillUnmount 執行的内容
     };
@@ -85,13 +87,12 @@ const detail = (props: any) => {
     const balance = await get(api.balance, {
       selectedAddress: ethereum.selectedAddress,
     });
-
     // const balance = await ethereum.request({
     //   method: 'eth_getBalance',
     //   params: [ethereum.selectedAddress, 'latest'],
     //   id: 1,
     // });
-    setDATBalance(Number(balance) / config.UNIT);
+    setDATBalance(utils.formatUnits(balance || '0', 18));
   };
 
   const getTbH = async () => {
@@ -183,7 +184,7 @@ const detail = (props: any) => {
     });
     // '0xe8883814b7fd4428590c9482e8570169703a6eacbb7e7f619b6bb1059608fb89056bc75e2d63100000';
     // '0xdf883814b7fd4428590c9482e8570169703a6eacbb7e7f619b6bb1059608fb02
-    console.log(tokenApproveData);
+    console.log(`tokenApproveData: ${tokenApproveData}`);
     // return false
     const approveTokenParameters = {
       nonce: '0x00', // ignored by MetaMask
@@ -431,7 +432,8 @@ const detail = (props: any) => {
               ({ getFieldValue }) => ({
                 validator(_, value) {
                   if (value) {
-                    if (value > DATBalance) {
+                    console.log(value, DATBalance, value > DATBalance);
+                    if (Number(value) > Number(DATBalance)) {
                       return Promise.reject(
                         new Error('委托数量不能超过账户余额!'),
                       );
