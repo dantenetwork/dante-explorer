@@ -54,6 +54,10 @@ function node(props: any) {
   useEffect(() => {
     // 需要在 componentDidMount 執行的内容
     getList();
+    ethereum.on('accountsChanged', function (accounts: any) {
+      //订阅 钱包地址更换地址
+      console.log('成功了 刷新吧1');
+    });
     return () => {
       // 需要在 componentWillUnmount 執行的内容
     };
@@ -61,6 +65,10 @@ function node(props: any) {
   useEffect(() => {
     //監聽屏幕
     getTbH();
+    ethereum.on('accountsChanged', function (accounts: any) {
+      //订阅 钱包地址更换地址
+      console.log('成功了 刷新吧2');
+    });
     return () => {};
   });
   const getTbH = async () => {
@@ -75,9 +83,9 @@ function node(props: any) {
 
   const getList = async () => {
     const originData: Item[] = [];
-    setLoading(true);
     try {
       if (!hasNext) return false;
+      setLoading(true);
       let data: any = await get(api.storage.list, { skip: page });
       setDataList(data.list);
       setTotal(data.total);
@@ -91,6 +99,7 @@ function node(props: any) {
       //   ...data.list
       // }))
       setLoading(false);
+      console.log('请求数据');
     } catch (error: any) {
       message.error(error);
       setLoading(false);

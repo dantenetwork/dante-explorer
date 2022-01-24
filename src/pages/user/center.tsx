@@ -113,9 +113,9 @@ function canter(props: any) {
 
   const getFileList = async () => {
     const originData: Item[] = [];
-    setLoading(true);
     try {
       if (!hasNext) return false;
+      setLoading(true);
       let data: any = await get(api.center.fileList, { skip: page });
       console.log(data);
       setFileList(data.list);

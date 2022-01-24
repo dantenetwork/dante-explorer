@@ -18,15 +18,14 @@ import {
   Col,
 } from 'antd';
 import { FormInstance } from 'antd/es/form';
-import { Link, connect, ConnectProps, namespace_shop } from 'umi';
+import { history, connect, ConnectProps } from 'umi';
 
 import axios from 'axios';
 import { get, post } from '@/utils/server';
 import { api } from '@/config/apis';
 import { UploadOutlined, InboxOutlined } from '@ant-design/icons';
 
-const MODELS_NAME = namespace_shop;
-console.log(namespace_shop);
+const ethereum = window.ethereum;
 
 interface Item {
   key: string;
@@ -35,7 +34,11 @@ interface Item {
   createdTime: string;
   overTime: string;
 }
-
+interface ProviderRpcError extends Error {
+  message: string;
+  code: number;
+  data?: unknown;
+}
 const originData: Item[] = [];
 
 const { Option } = Select;
@@ -58,10 +61,11 @@ const normFile = (e: any) => {
 
 function canter(props: any) {
   const [dataList, setDataList] = useState(originData);
+  const [loading, setLoading] = useState(false);
   const [orderQuery, setOrderQuery] = useState({
     cid: '', //deal cid of IPFS network
     size: 0, //deal files size
-    price: 0, //deal price per block
+    deal_price: 0, //deal price
     duration: 0, //deal duration (blocks)
     miner_required: 0, //number of miners required
   });
@@ -69,11 +73,13 @@ function canter(props: any) {
   const formRef = React.createRef<FormInstance>();
   useEffect(() => {
     // 需要在 componentDidMount 執行的内容
+
     getList();
     return () => {
       // 需要在 componentWillUnmount 執行的内容
     };
   }, []);
+
   // useEffect(() => {//監聽屏幕
   //   getTbH()
   //   return () => {
@@ -127,18 +133,96 @@ function canter(props: any) {
 
   const onFinish = async (values: any) => {
     console.log('Received values of form: ', values, orderQuery);
+    setLoading(true);
     if (values.public_chain === '1') {
-      message.success('success');
+      message.success('订单创建成功', () => {
+        cancel();
+      });
     } else {
-      let data = await get(api.order.addDeal, {
+      const newConfig: any = await get('/config');
+      const selectedAddressHex = ethereum?.selectedAddress;
+
+      const tokenContractAddressHex = newConfig.tokenContractAddressHex;
+      // '0xaab2110f01c41b9fb05b6472fa6c5c1c8f259abb';
+
+      const tokenApproveData = await get(api.storage.encodeTokenApprove, {
+        amount: Number(values.deal_price),
+      });
+      // '0xdf883814b7fd4428590c9482e8570169703a6eacbb7e7f619b6bb1059608fb02
+
+      console.log(`tokenApproveData: ${tokenApproveData}`);
+      // return false
+      const approveTokenParameters = {
+        nonce: '0x00', // ignored by MetaMask
+        gasPrice: '0x4A817C800', // customizable by user during MetaMask confirmation.
+        gas: '0xF4240', // customizable by user during MetaMask confirmation.
+        to: tokenContractAddressHex, // Required except during contract publications.
+        from: selectedAddressHex, // must match user's active address.
+        value: '0x00', // Only required to send ether to the recipient from the initiating external account.
+        data: tokenApproveData, // Optional, but used for defining smart contract creation and interaction.
+        chainId: '210309', // Used to prevent transaction reuse across blockchains. Auto-filled by MetaMask.
+      };
+      console.log(`approveTokenParameters:${approveTokenParameters}`);
+
+      // send approve transaction
+      // txHash is a hex string
+      // As with any RPC call, it may throw an error
+      const approveTxHash = await ethereum
+        .request({
+          method: 'eth_sendTransaction',
+          params: [approveTokenParameters],
+        })
+        .catch((err: any) => {
+          console.error(err);
+        });
+      console.log(`approveTxHash：${approveTxHash}`);
+
+      let stakeTokenData = await get(api.order.addDeal, {
         cid: orderQuery.cid,
         size: Number(orderQuery.size),
-        price: Number(values.price),
+        deal_price: Number(values.deal_price),
         duration: Number(values.duration),
         miner_required: Number(values.miner_required),
+      }).catch((err: any) => {
+        console.error(err);
       });
-      console.log(data);
+
+      const marketContractAddressHex = newConfig.marketContractAddressHex;
+      // '0x82e8570169703a6eacbb7e7f619b6bb1059608fb';
+
+      console.log('stakeTokenData：', stakeTokenData);
+      const stakeTokenParameters = {
+        nonce: '0x00', // ignored by MetaMask
+        gasPrice: '0x4A817C800', // customizable by user during MetaMask confirmation.
+        gas: '0xF4240', // customizable by user during MetaMask confirmation.
+        to: marketContractAddressHex, // Required except during contract publications.
+        from: selectedAddressHex, // must match user's active address.
+        value: '0x00', // Only required to send ether to the recipient from the initiating external account.
+        data: stakeTokenData, // Optional, but used for defining smart contract creation and interaction.
+        chainId: '210309', // Used to prevent transaction reuse across blockchains. Auto-filled by MetaMask.
+      };
+      console.log(stakeTokenParameters);
+
+      // send stake token transaction
+
+      setTimeout(async function () {
+        const stakeTxHash = await ethereum.request({
+          method: 'eth_sendTransaction',
+          params: [stakeTokenParameters],
+        });
+        console.log(stakeTxHash);
+        if (stakeTxHash) {
+          message.success('订单创建成功', () => {
+            cancel();
+          });
+        }
+      }, 1500);
+      await setLoading(false);
     }
+  };
+
+  const cancel = async () => {
+    history.goBack();
   };
 
   return (
@@ -255,27 +339,11 @@ function canter(props: any) {
             />
           </Form.Item>
 
-          <Form.Item label="总价" className="items required">
-            <Form.Item
-              name="price"
-              rules={[{ required: true, message: '请输入总价!' }]}
-              noStyle
-            >
-              <InputNumber
-                min={0}
-                max={99999999999}
-                placeholder="请输入总价"
-                className="input"
-              />
-            </Form.Item>
-            <span className="ant-form-text"> DAT</span>
-          </Form.Item>
-
           <Form.Item
-            label="区块数量"
+            label="订单周期"
             name="duration"
             className="items"
-            rules={[{ required: true, message: '请输入>0的整数!' }]}
+            rules={[{ required: true, message: '请输入区块数量!' }]}
           >
             <InputNumber
               parser={(value) => {
@@ -295,16 +363,38 @@ function canter(props: any) {
               className="input"
             />
           </Form.Item>
+
+          <Form.Item label="总价" className="items required">
+            <Form.Item
+              name="deal_price"
+              rules={[{ required: true, message: '请输入总价!' }]}
+              noStyle
+            >
+              <InputNumber
+                min={0}
+                max={99999999999}
+                placeholder="请输入总价"
+                className="input"
+              />
+            </Form.Item>
+            <span className="ant-form-text"> DAT</span>
+          </Form.Item>
           <Form.Item wrapperCol={{ span: 15, offset: 5 }} className="btn">
             <Button
               type="primary"
               className="btn_ori btn_ori_submit"
               shape="round"
               htmlType="submit"
+              loading={loading}
             >
               提交
             </Button>
-            <Button type="default" className="btn_ori_cancel" shape="round">
+            <Button
+              type="default"
+              onClick={cancel}
+              className="btn_ori_cancel"
+              shape="round"
+            >
               取消
             </Button>
           </Form.Item>

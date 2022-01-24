@@ -184,6 +184,7 @@ const detail = (props: any) => {
     });
     // '0xe8883814b7fd4428590c9482e8570169703a6eacbb7e7f619b6bb1059608fb89056bc75e2d63100000';
     // '0xdf883814b7fd4428590c9482e8570169703a6eacbb7e7f619b6bb1059608fb02
+
     console.log(`tokenApproveData: ${tokenApproveData}`);
     // return false
     const approveTokenParameters = {
