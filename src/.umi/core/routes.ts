@@ -37,7 +37,7 @@ export function getRoutes() {
         "exact": true
       },
       {
-        "path": "/order/detail",
+        "path": "/order/detail/:id",
         "component": dynamic({ loader: () => import(/* webpackChunkName: 'p__order__detail' */'@/pages/order/detail'), loading: LoadingComponent}),
         "title": "订单详情",
         "exact": true

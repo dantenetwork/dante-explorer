@@ -19,11 +19,12 @@ import {
 } from 'antd';
 import { FormInstance } from 'antd/es/form';
 import { history, connect, ConnectProps } from 'umi';
-
 import axios from 'axios';
 import { get, post } from '@/utils/server';
 import { api } from '@/config/apis';
 import { UploadOutlined, InboxOutlined } from '@ant-design/icons';
+
+import { create } from 'ipfs-http-client';
 
 const ethereum = window.ethereum;
 
@@ -40,7 +41,15 @@ interface ProviderRpcError extends Error {
   data?: unknown;
 }
 const originData: Item[] = [];
-
+interface formData {
+  cid: string;
+  deal_price: number;
+  duration: number;
+  encrypted_storage: string;
+  miner_required: number;
+  public_chain: string;
+  tactics: string;
+}
 const { Option } = Select;
 
 const formItemLayout = {
@@ -60,7 +69,10 @@ const normFile = (e: any) => {
 };
 
 function canter(props: any) {
+  console.log(props);
   const [dataList, setDataList] = useState(originData);
+  const [totalPrice, setTotalPrice] = useState(0);
+
   const [loading, setLoading] = useState(false);
   const [orderQuery, setOrderQuery] = useState({
     cid: '', //deal cid of IPFS network
@@ -71,6 +83,7 @@ function canter(props: any) {
   });
   const [tbH, setTbH] = useState(600);
   const formRef = React.createRef<FormInstance>();
+
   useEffect(() => {
     // 需要在 componentDidMount 執行的内容
 
@@ -79,21 +92,18 @@ function canter(props: any) {
       // 需要在 componentWillUnmount 執行的内容
     };
   }, []);
-
-  // useEffect(() => {//監聽屏幕
-  //   getTbH()
-  //   return () => {
-  //   };
-  // });
-  // const getTbH = async ()=> {
-  //   const { navHeight, wHeight }: any = props;
-  //   const ph: any = document.querySelector('.upagination')?.clientHeight || 0;
-  //   const newTbH = wHeight - navHeight - ph - 240;
-  //   console.log(wHeight, navHeight, ph);
-  //   if (tbH !== newTbH) {
-  //     setTbH(newTbH);
-  //   }
-  // }
+  useEffect(() => {
+    //監聽屏幕
+    ethereum.on('accountsChanged', function (accounts: any) {
+      //订阅 钱包地址更换地址
+      console.log('插件钱包变换');
+    });
+    ethereum.on('message', function (accounts: any) {
+      //订阅 钱包地址更换地址
+      console.log('插件钱包-消息来了');
+    });
+    return () => {};
+  });
 
   const getList = async () => {
     const originData: Item[] = [];
@@ -122,9 +132,16 @@ function canter(props: any) {
   };
 
   const goUploadFile = async (val: any) => {
-    var formData = new FormData();
-    formData.append('file', val.file);
-    let data: any = await get(api.common.uploadFile, { file: formData });
+    const client = create(props.config.IPFS);
+    const result = await client.add(val.file);
+    console.log('cid: ', result);
+    // const cid = result.name;
+
+    const data = {
+      cid: result.path,
+      size: result.size,
+    };
+
     setOrderQuery((oldData) => ({
       ...oldData,
       ...data,
@@ -139,14 +156,17 @@ function canter(props: any) {
         cancel();
       });
     } else {
-      const newConfig: any = await get('/config');
       const selectedAddressHex = ethereum?.selectedAddress;
 
-      const tokenContractAddressHex = newConfig.tokenContractAddressHex;
+      const tokenContractAddressHex = props.config.tokenContractAddressHex;
       // '0xaab2110f01c41b9fb05b6472fa6c5c1c8f259abb';
-
+      const totalPrices =
+        Number(values.deal_price) *
+        Number(values.miner_required) *
+        Number(values.duration);
       const tokenApproveData = await get(api.storage.encodeTokenApprove, {
-        amount: Number(values.deal_price),
+        type: 'market',
+        amount: totalPrices,
       });
       // '0xdf883814b7fd4428590c9482e8570169703a6eacbb7e7f619b6bb1059608fb02
 
@@ -187,7 +207,7 @@ function canter(props: any) {
         console.error(err);
       });
 
-      const marketContractAddressHex = newConfig.marketContractAddressHex;
+      const marketContractAddressHex = props.config.marketContractAddressHex;
       // '0x82e8570169703a6eacbb7e7f619b6bb1059608fb';
 
       console.log('stakeTokenData：', stakeTokenData);
@@ -211,10 +231,13 @@ function canter(props: any) {
           params: [stakeTokenParameters],
         });
         console.log(stakeTxHash);
-        if (stakeTxHash) {
-          message.success('订单创建成功', () => {
-            cancel();
-          });
+        const detail = await get(api.order.dealDetail + '/' + orderQuery.cid);
+        if (orderQuery.cid) {
+          await message.success('订单创建成功');
+          if (Array.isArray(detail) && detail.length > 0) {
+            history.push('/order/detail/' + orderQuery.cid);
+          }
+          console.log(detail);
         }
       }, 1500);
       await setLoading(false);
@@ -225,6 +248,15 @@ function canter(props: any) {
     history.goBack();
   };
 
+  const onValuesChange = async (
+    changedFields: formData,
+    allFields: formData,
+  ) => {
+    console.log(changedFields, allFields);
+    const total =
+      allFields.duration * allFields.miner_required * allFields.deal_price;
+    setTotalPrice(total || 0);
+  };
   return (
     <div className={styles.order}>
       <div className={`max-body contain postForm ${styles.contain}`}>
@@ -233,6 +265,7 @@ function canter(props: any) {
           name="validate_other"
           {...formItemLayout}
           onFinish={onFinish}
+          onValuesChange={onValuesChange}
           initialValues={{
             'input-number': 3,
             'checkbox-group': ['A', 'B'],
@@ -317,7 +350,22 @@ function canter(props: any) {
           <Form.Item
             label="存储节点数量"
             name="miner_required"
-            rules={[{ required: true, message: '请输入存储节点数量!' }]}
+            rules={[
+              {
+                required: true,
+                validator: (_, value) => {
+                  if (value || value === 0) {
+                    if (value <= 0) {
+                      return Promise.reject(new Error('存储节点数量需大于0 !'));
+                    } else {
+                      return Promise.resolve();
+                    }
+                  } else {
+                    return Promise.reject(new Error('请输入存储节点数量 !'));
+                  }
+                },
+              },
+            ]}
             className="items"
           >
             <InputNumber
@@ -343,7 +391,22 @@ function canter(props: any) {
             label="订单周期"
             name="duration"
             className="items"
-            rules={[{ required: true, message: '请输入区块数量!' }]}
+            rules={[
+              {
+                required: true,
+                validator: (_, value) => {
+                  if (value || value === 0) {
+                    if (value <= 0) {
+                      return Promise.reject(new Error('区块数量需大于0 !'));
+                    } else {
+                      return Promise.resolve();
+                    }
+                  } else {
+                    return Promise.reject(new Error('请输入区块数量 !'));
+                  }
+                },
+              },
+            ]}
           >
             <InputNumber
               parser={(value) => {
@@ -364,20 +427,38 @@ function canter(props: any) {
             />
           </Form.Item>
 
-          <Form.Item label="总价" className="items required">
+          <Form.Item label="价格" className="items required">
             <Form.Item
               name="deal_price"
-              rules={[{ required: true, message: '请输入总价!' }]}
+              rules={[
+                {
+                  required: true,
+                  validator: (_, value) => {
+                    if (value || value === 0) {
+                      if (value <= 0) {
+                        return Promise.reject(new Error('价格需大于0 !'));
+                      } else {
+                        return Promise.resolve();
+                      }
+                    } else {
+                      return Promise.reject(new Error('请输入价格 !'));
+                    }
+                  },
+                },
+              ]}
               noStyle
             >
               <InputNumber
                 min={0}
                 max={99999999999}
-                placeholder="请输入总价"
+                placeholder="请输入价格"
                 className="input"
               />
             </Form.Item>
             <span className="ant-form-text"> DAT</span>
+          </Form.Item>
+          <Form.Item label="总价" className="items required">
+            <span className="ant-form-text">{totalPrice} DAT</span>
           </Form.Item>
           <Form.Item wrapperCol={{ span: 15, offset: 5 }} className="btn">
             <Button

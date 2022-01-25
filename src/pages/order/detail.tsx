@@ -8,31 +8,21 @@ import { get, post } from '@/utils/server';
 import { api } from '@/config/apis';
 const ethereum = window.ethereum;
 
-interface Item {
-  key: string;
-  totalCapacity: Number;
-  taskVolume: string;
-  Delegator: Number;
-  joinTime: string;
-  totalPledge: string;
-  entrustedIncome: Number;
+interface ItemValue {
+  name: string;
+  value: Number;
 }
+const DataItemValue: ItemValue[] = [];
 
-const originData: Item[] = [];
-
+interface nodeItem {
+  name: string;
+  id: Number;
+}
+const nodeListData: nodeItem[] = [];
 const detail = (props: any) => {
-  const [publicKey, setPublicKey] = useState(props.location.query?.key || '');
-  const [detail, setDetail] = useState({
-    key: '',
-    totalCapacity: 0,
-    taskVolume: '',
-    latAddress: '',
-    Delegator: 0,
-    joinTime: '',
-    totalPledge: '',
-    entrustedIncome: 0,
-  });
-  const [dataList, setDataList] = useState(originData);
+  const [publicKey, setPublicKey] = useState(props.match.params?.id || '');
+  const [detail, setDetail] = useState(DataItemValue);
+  const [dataList, setDataList] = useState(nodeListData);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [hasNext, setHasNext] = useState(true);
@@ -63,111 +53,39 @@ const detail = (props: any) => {
     }
   };
 
-  const getList = async () => {
-    const originData: Item[] = [];
-    try {
-      if (!hasNext) return false;
-      let data: any = await get(api.storage.list, { skip: page });
-      setDataList(data.list);
-      setTotal(data.total);
-      if (data.total - page * 10 > 10) {
-        setPage(page + 1);
-        setHasNext(true);
-      } else {
-        setHasNext(false);
-      }
-      // setDataList((oldData)=>({
-      //   ...data.list
-      // }))
-    } catch (error: any) {
-      message.error(error);
-    }
-    // setDataList(originData);
-  };
-
   const init = async () => {
     try {
-      console.log(publicKey);
-      let data: any = await get(api.storage.detail, {
-        enclave_public_key: publicKey,
-      });
+      const data: any = await get(api.order.dealDetail + '/' + publicKey);
+      console.log(data[11]);
       setDetail(data);
-      console.log(data);
+      const newArrray = Array.isArray(detail[11]?.value)
+        ? detail[11].value
+        : [];
+      setDataList(newArrray);
     } catch (error: any) {
       message.error(error);
-    }
-  };
-
-  const entrust = async () => {
-    console.log(props.accountAddress);
-    if (!props.accountAddress) {
-      history.push('/login');
-    } else {
-      const selectedAddressHex = props.accountAddress;
-      const contractAddressHex = detail?.latAddress;
-      const data = {
-        enclave_public_key: detail.key,
-        amount: 0,
-      };
-      const transactionParameters = {
-        nonce: '0x00', // ignored by MetaMask
-        gasPrice: '0x4A817C800', // customizable by user during MetaMask confirmation.
-        gas: '0xF4240', // customizable by user during MetaMask confirmation.
-        to: contractAddressHex, // Required except during contract publications.
-        from: selectedAddressHex, // must match user's active address.
-        value: '0x00', // Only required to send ether to the recipient from the initiating external account.
-        data: detail.key, // Optional, but used for defining smart contract creation and interaction.
-        chainId: '210309', // Used to prevent transaction reuse across blockchains. Auto-filled by MetaMask.
-      };
-      console.log(transactionParameters);
-
-      // txHash is a hex string
-      // As with any RPC call, it may throw an error
-      const txHash = await ethereum.request({
-        method: 'eth_sendTransaction',
-        params: [transactionParameters],
-      });
-      console.log(txHash);
     }
   };
 
   const columns: any[] = [
     {
-      title: '订单ID',
-      dataIndex: 'key',
+      title: '节点ID(enclave key）',
+      dataIndex: 'id',
       width: '30%',
       align: 'center', // 设置文本居中的属性
-      render: (key: any) => (
-        <Link to={`/storage/detail?key=${key}`} className="link">
-          {key}
-        </Link>
-      ),
+      render: (id: any) => ({ id }),
     },
     {
-      title: '订单状态',
-      dataIndex: 'totalCapacity',
+      title: '节点名称',
+      dataIndex: 'name',
       width: '20%',
       align: 'center',
-    },
-    {
-      title: '创建时间',
-      dataIndex: 'joinTime',
-      width: '20%',
-      align: 'center',
-      render: (val: string) => <span>{val || '-'}</span>,
-    },
-    {
-      title: '有效期至',
-      dataIndex: 'totalPledge',
-      width: '20%',
-      align: 'center',
-      render: (val: string) => <span>{val || '-'}</span>,
     },
   ];
   const mergedColumns = columns.map((col) => {
     return {
       ...col,
-      onCell: (record: Item) => ({
+      onCell: (record: nodeItem) => ({
         record,
         // dataIndex: col.dataIndex,
         title: col.title,
@@ -188,65 +106,71 @@ const detail = (props: any) => {
         <div className={styles.txt_row}>
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>发起人：</div>
-            <div className={styles.txt_item_val}>{detail.totalCapacity}</div>
+            <div className={styles.txt_item_val}>{detail[7]?.value}</div>
           </div>
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>状态：</div>
-            <div className={styles.txt_item_val}>{detail.Delegator}</div>
+            <div className={styles.txt_item_val}>
+              {
+                ['等待接单', '已接满', '已到期', '非法订单'][
+                  Number(detail[1]?.value)
+                ]
+              }
+            </div>
           </div>
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>大小：</div>
-            <div className={styles.txt_item_val}>{detail.totalPledge} GB</div>
+            <div className={styles.txt_item_val}>{detail[3]?.value}</div>
           </div>
         </div>
         <div className={styles.txt_row}>
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>价格：</div>
-            <div className={styles.txt_item_val}>
-              {detail.totalCapacity} DAT
-            </div>
+            <div className={styles.txt_item_val}>{detail[4]?.value} DAT</div>
           </div>
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>区块号：</div>
-            <div className={styles.txt_item_val}>{detail.Delegator}</div>
+            <div className={styles.txt_item_val}>{detail[6]?.value}</div>
           </div>
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>区块数：</div>
-            <div className={styles.txt_item_val}>{detail.totalPledge}</div>
+            <div className={styles.txt_item_val}>{detail[5]?.value}</div>
           </div>
         </div>
-        <div className={styles.txt_row}>
+        {/* <div className={styles.txt_row}>
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>到期区块：</div>
-            <div className={styles.txt_item_val}>{detail.totalCapacity}</div>
+            <div className={styles.txt_item_val}>{detail[7]?.value}</div>
           </div>
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>预估时间：</div>
-            <div className={styles.txt_item_val}>{detail.Delegator}</div>
+            <div className={styles.txt_item_val}>{detail[7]?.value}</div>
           </div>
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>订单结束时间：</div>
-            <div className={styles.txt_item_val}>{detail.totalPledge}</div>
+            <div className={styles.txt_item_val}>{detail[7]?.value}</div>
           </div>
-        </div>
+        </div> */}
         <div className={styles.txt_row}>
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>罚没：</div>
-            <div className={styles.txt_item_val}>{detail.totalCapacity}</div>
+            <div className={styles.txt_item_val}>
+              {['未被罚没', '已被罚没'][Number(detail[2]?.value)]}
+            </div>
           </div>
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>奖励总额：</div>
-            <div className={styles.txt_item_val}>{detail.Delegator}</div>
+            <div className={styles.txt_item_val}>{detail[9]?.value}</div>
           </div>
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>奖励余额：</div>
-            <div className={styles.txt_item_val}>{detail.totalPledge} DAT</div>
+            <div className={styles.txt_item_val}>{detail[10]?.value}</div>
           </div>
         </div>
 
         <div className="space"></div>
 
-        {/* <Divider style={{ color: '#f70d0dd9',margin: "40px 0" }} />
+        <Divider style={{ color: '#f70d0dd9', margin: '40px 0' }} />
         <div className="title">节点列表</div>
         <div className="utable orderTable">
           <Table
@@ -256,7 +180,7 @@ const detail = (props: any) => {
             rowClassName="editable-row"
             pagination={false}
           />
-        </div> */}
+        </div>
       </div>
       {/* <div className="max-body upagination">
         <Pagination

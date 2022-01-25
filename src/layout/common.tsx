@@ -10,19 +10,31 @@ import { ContainerQuery } from 'react-container-query';
 import { history, NavLink, Link, connect } from 'umi';
 const { TabPane } = Tabs;
 import { debounce } from '@/utils/utils';
+import { get, post } from '@/utils/server';
 const ethereum = window.ethereum;
 class common extends Component<any, any> {
   constructor(props: any) {
     super(props);
     this.tabsChange = this.tabsChange.bind(this);
+    this.searchSubmit = this.searchSubmit.bind(this);
+    this.searchValueChange = this.searchValueChange.bind(this);
     this.state = {
       current: '',
       address: '',
+      searchValue: '',
     };
   }
 
   async componentDidMount() {
     const _this = this;
+    const newConfig: any = await get('/config');
+    this.props.dispatch({
+      type: `common/update`,
+      payload: {
+        config: newConfig,
+      },
+    });
+
     if (ethereum !== 'undefined') {
       await setTimeout(() => {
         _this.setState({ address: ethereum.selectedAddress || '' });
@@ -33,7 +45,6 @@ class common extends Component<any, any> {
         });
       }, 500);
     }
-
     this.setResize();
     window.addEventListener('resize', debounce(this.setResize.bind(this))); // listener window resize
 
@@ -87,6 +98,15 @@ class common extends Component<any, any> {
         break;
     }
   }
+  searchValueChange(val: any) {
+    this.setState({ searchValue: val?.target.value });
+  }
+  searchSubmit(val: any) {
+    const { searchValue } = this.state;
+    window.open(
+      `https://scan.platon.network/address-detail?address=${searchValue}`,
+    );
+  }
 
   render() {
     const query = {
@@ -109,7 +129,7 @@ class common extends Component<any, any> {
         minWidth: 1400,
       },
     };
-    const { current, address } = this.state;
+    const { current, address, searchValue } = this.state;
     const myTabs = (
       <Tabs
         defaultActiveKey={current}
@@ -137,10 +157,11 @@ class common extends Component<any, any> {
               <Input
                 className={styles.input}
                 placeholder="请输入交易哈希/账户地址查询"
-                // value
-                // onPressEnter
+                onChange={this.searchValueChange}
+                onPressEnter={this.searchSubmit}
                 suffix={
                   <SearchOutlined
+                    onClick={this.searchSubmit}
                     style={{
                       color: 'RGBA(109, 112, 145, 1)',
                       fontSize: '26px',

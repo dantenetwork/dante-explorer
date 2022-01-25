@@ -168,18 +168,19 @@ const detail = (props: any) => {
   };
 
   const entrusting = async (count: Number) => {
-    const newConfig: any = await get('/config');
-    console.log('666666666', newConfig);
+    // const newConfig: any = await get('/config');
+    // console.log('666666666', newConfig);
     const selectedAddressHex = props.accountAddress;
     // const contractAddressHex = detail?.senderAddressHex;
 
-    const tokenContractAddressHex = newConfig.tokenContractAddressHex;
+    const tokenContractAddressHex = props.config.tokenContractAddressHex;
     // '0xaab2110f01c41b9fb05b6472fa6c5c1c8f259abb';
 
-    const verifyContractAddressHex = newConfig.verifyContractAddressHex;
+    const verifyContractAddressHex = props.config.verifyContractAddressHex;
     // '0x82e8570169703a6eacbb7e7f619b6bb1059608fb';
 
     const tokenApproveData = await get(api.storage.encodeTokenApprove, {
+      type: 'verify',
       amount: Number(count),
     });
     // '0xe8883814b7fd4428590c9482e8570169703a6eacbb7e7f619b6bb1059608fb89056bc75e2d63100000';

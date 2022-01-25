@@ -72,9 +72,9 @@ export function get(url: string, params = {}) {
  * @returns {Promise}
  */
 
-export function post(url: string, data: any) {
+export function post(url: string, data: any, headers = {}) {
   return new Promise((resolve, reject) => {
-    axios.post(url, data).then(
+    axios.post(url, data, headers).then(
       (response) => {
         //关闭进度条
         if (response) {
@@ -89,6 +89,35 @@ export function post(url: string, data: any) {
     );
   });
 }
+
+/**
+ * 封装file方法
+ * @param url  请求url
+ * @param params  请求参数
+ * @returns {Promise}
+ */
+
+//  export function get(url: string, params = {},header = {}) {
+//   return new Promise((resolve, reject) => {
+//     axios(url, formData, header);
+
+//     axios
+//       .get(url, {
+//         params: params,
+//       })
+//       .then((response) => {
+//         if (response) {
+//           landing(url, params, response?.data);
+//           resolve(response?.data);
+//         } else {
+//           reject('request error');
+//         }
+//       })
+//       .catch((error) => {
+//         reject(error);
+//       });
+//   });
+// }
 
 /**
  * 封装patch请求

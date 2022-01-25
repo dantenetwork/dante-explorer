@@ -24,6 +24,12 @@ function canter(props: any) {
   const [stakeList, setStakeList] = useState(originData);
   const [DATBalance, setDATBalance] = useState(0);
   const [fileList, setFileList] = useState(originData);
+
+  const [fileQuery, setFileQuery] = useState({
+    total: 0,
+    page: 0,
+    hasNext: true,
+  });
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [hasNext, setHasNext] = useState(true);
@@ -53,15 +59,10 @@ function canter(props: any) {
   }, []);
 
   const refreshBalance = async () => {
-    const balance = await get(api.balance, {
+    let balance: any = await get(api.balance, {
       selectedAddress: ethereum.selectedAddress,
     });
-    // const balance = await ethereum.request({
-    //   method: 'eth_getBalance',
-    //   params: [ethereum.selectedAddress, 'latest'],
-    //   id: 1,
-    // });
-    setDATBalance(utils.formatUnits(balance || '0', 18));
+    setDATBalance(utils.formatUnits(balance, 18));
   };
 
   const init = async () => {
@@ -113,10 +114,15 @@ function canter(props: any) {
 
   const getFileList = async () => {
     const originData: Item[] = [];
+    const { hasNext, total, page } = fileQuery;
+    console.log(hasNext, total, page);
     try {
       if (!hasNext) return false;
       setLoading(true);
-      let data: any = await get(api.center.fileList, { skip: page });
+      let data: any = await get(api.center.fileList, {
+        sender: ethereum.selectedAddress,
+        skip: page,
+      });
       console.log(data);
       setFileList(data.list);
       setTotal(data.total);
@@ -200,18 +206,30 @@ function canter(props: any) {
         <div className={styles.txt_row}>
           <div className={styles.txt_title}>账户余额</div>
           <div className={styles.txt_item}>
-            <div className={`${styles.txt_item_title} ${styles.me}`}>
-              PlatON
-            </div>
-            <div className={`${styles.txt_item_val} ${styles.me}`}>
-              {DATBalance} DAT
-            </div>
+            <a
+              className={styles.txt_item}
+              href={`https://scan.platon.network/address-detail?address=${ethereum.selectedAddress}`}
+              target="_blank"
+            >
+              <div className={`${styles.txt_item_title} ${styles.me}`}>
+                PlatON
+              </div>
+              <div className={`${styles.txt_item_val} ${styles.me}`}>
+                {Number(DATBalance).toFixed(4) || 0} DAT
+              </div>
+            </a>
           </div>
           <div className={styles.txt_item}>
-            <div className={`${styles.txt_item_title} ${styles.me}`}>NEAR</div>
-            <div className={`${styles.txt_item_val} ${styles.me}`}>
-              104.89 DAT
-            </div>
+            <a
+              className={styles.txt_item}
+              href={`https://explorer.near.org/accounts/slkrb10.near`}
+              target="_blank"
+            >
+              <div className={`${styles.txt_item_title} ${styles.me}`}>
+                NEAR
+              </div>
+              <div className={`${styles.txt_item_val} ${styles.me}`}>0 DAT</div>
+            </a>
           </div>
         </div>
         <div className={styles.txt_row}>
@@ -225,7 +243,7 @@ function canter(props: any) {
           </div>
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>NEAR</div>
-            <div className={styles.txt_item_val}>104.89 DAT</div>
+            <div className={styles.txt_item_val}>0 DAT</div>
             <Button className="btn_ori" type="primary" shape="round">
               领取
             </Button>

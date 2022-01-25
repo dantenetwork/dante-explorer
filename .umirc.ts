@@ -28,7 +28,7 @@ export default defineConfig({
         { path: '/login', component: '@/pages/user/login', title: '登录' },
         { path: '/order', component: '@/pages/order/order', title: '订单列表' },
         {
-          path: '/order/detail',
+          path: '/order/detail/:id',
           component: '@/pages/order/detail',
           title: '订单详情',
         },
