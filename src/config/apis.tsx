@@ -20,7 +20,9 @@ export const api = {
   },
   center: {
     stakeList: '/canter/stake_list',
-    stakeReward: '/canter/stake_reward',
+    total_mining_reward: '/canter/total_mining_reward',
+    encodeReceiveToken: '/canter/encode_receive_token',
+    encodeStakeToken: '/canter/encode_stake_token',
     unstake: '/canter/unstake',
     fileList: '/canter/file_list',
   },

@@ -22,10 +22,21 @@ interface Item {
 
 const originData: Item[] = [];
 
+interface stakeItem {
+  address: string;
+  amount: string;
+  enclave_public_key: string;
+  stake_block_num: string;
+}
+
+const originStakeData: stakeItem[] = [];
+
 function canter(props: any) {
-  const [stakeList, setStakeList] = useState(originData);
+  const [stakeList, setStakeList] = useState(originStakeData);
   const [DATBalance, setDATBalance] = useState(0);
   const [fileList, setFileList] = useState(originData);
+  const [stakeLoading, setStakeLoading] = useState(true);
+  const [fileLoading, setFileLoading] = useState(true);
 
   const [fileQuery, setFileQuery] = useState({
     total: 0,
@@ -47,6 +58,7 @@ function canter(props: any) {
     joinTime: '',
     totalPledge: '',
     entrustedIncome: 0,
+    amount: 0,
   });
   useEffect(() => {
     // 需要在 componentDidMount 執行的内容
@@ -74,7 +86,6 @@ function canter(props: any) {
         enclave_public_key: ethereum.selectedAddress,
       });
       setDetail(data);
-      console.log(data);
     } catch (error: any) {
       console.log(error);
       // message.error(error);
@@ -86,6 +97,7 @@ function canter(props: any) {
   };
 
   const getStakeList = async () => {
+    setStakeLoading(true);
     const originData: Item[] = [];
 
     try {
@@ -93,10 +105,12 @@ function canter(props: any) {
         from: ethereum.selectedAddress,
         skip: 0,
       });
-      setStakeList(data.list);
-      console.log(data);
+
+      setStakeList(data);
     } catch (error: any) {
       message.error(error);
+    } finally {
+      setStakeLoading(false);
     }
   };
 
@@ -119,6 +133,7 @@ function canter(props: any) {
     const originData: Item[] = [];
     const { hasNext, total, page } = fileQuery;
     console.log(hasNext, total, page);
+    setFileLoading(true);
     try {
       if (!hasNext) return false;
       setLoading(true);
@@ -139,6 +154,8 @@ function canter(props: any) {
     } catch (error: any) {
       message.error(error);
       setLoading(false);
+    } finally {
+      setFileLoading(false);
     }
   };
 
@@ -157,42 +174,179 @@ function canter(props: any) {
 
   // }
 
+  const Receive = async () => {
+    // const newConfig: any = await get('/config');
+    // console.log('666666666', newConfig);
+    const selectedAddressHex = props.accountAddress;
+    // const contractAddressHex = detail?.senderAddressHex;
+
+    const tokenContractAddressHex = props.config.tokenContractAddressHex;
+    // '0xaab2110f01c41b9fb05b6472fa6c5c1c8f259abb';
+
+    const verifyContractAddressHex = props.config.verifyContractAddressHex;
+    // '0x82e8570169703a6eacbb7e7f619b6bb1059608fb';
+
+    const tokenApproveData = await get(api.storage.encodeTokenApprove, {
+      type: 'verify',
+      amount: Number(detail.amount),
+    });
+
+    console.log(`tokenApproveData: ${tokenApproveData}`);
+    // return false
+    const approveTokenParameters = {
+      nonce: '0x00', // ignored by MetaMask
+      gasPrice: '0x4A817C800', // customizable by user during MetaMask confirmation.
+      gas: '0xF4240', // customizable by user during MetaMask confirmation.
+      to: tokenContractAddressHex, // Required except during contract publications.
+      from: selectedAddressHex, // must match user's active address.
+      value: '0x00', // Only required to send ether to the recipient from the initiating external account.
+      data: tokenApproveData, // Optional, but used for defining smart contract creation and interaction.
+      chainId: '210309', // Used to prevent transaction reuse across blockchains. Auto-filled by MetaMask.
+    };
+    console.log(approveTokenParameters);
+    // send approve transaction
+    // txHash is a hex string
+    // As with any RPC call, it may throw an error
+    const approveTxHash = await ethereum.request({
+      method: 'eth_sendTransaction',
+      params: [approveTokenParameters],
+    });
+    console.log(approveTxHash);
+
+    const stakeTokenData = await get(api.center.total_mining_reward, {});
+    // '0xf89688a6e7356e85fe65cfb88230343734633465636461386435323861356164663238313062323763313734626531376338366532363361303939386633383061343266346132656233353066633534666233343131343661363330356261343336626339333334303266393836386430313333386163633761626438313835346332386231343738316237386131880de0b6b3a7640000';
+    console.log('stakeTokenData：', stakeTokenData);
+    const stakeTokenParameters = {
+      nonce: '0x00', // ignored by MetaMask
+      gasPrice: '0x4A817C800', // customizable by user during MetaMask confirmation.
+      gas: '0xF4240', // customizable by user during MetaMask confirmation.
+      to: verifyContractAddressHex, // Required except during contract publications.
+      from: selectedAddressHex, // must match user's active address.
+      value: '0x00', // Only required to send ether to the recipient from the initiating external account.
+      data: stakeTokenData, // Optional, but used for defining smart contract creation and interaction.
+      chainId: '210309', // Used to prevent transaction reuse across blockchains. Auto-filled by MetaMask.
+    };
+    console.log(stakeTokenParameters);
+
+    // send stake token transaction
+
+    setTimeout(async function () {
+      const stakeTxHash = await ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [stakeTokenParameters],
+      });
+      getStakeList();
+      console.log(stakeTxHash);
+    }, 2000);
+  };
+
+  const ransom = async (row: any) => {
+    // const newConfig: any = await get('/config');
+    // console.log('666666666', newConfig);
+    const selectedAddressHex = props.accountAddress;
+    // const contractAddressHex = detail?.senderAddressHex;
+
+    const tokenContractAddressHex = props.config.tokenContractAddressHex;
+    // '0xaab2110f01c41b9fb05b6472fa6c5c1c8f259abb';
+
+    const verifyContractAddressHex = props.config.verifyContractAddressHex;
+    // '0x82e8570169703a6eacbb7e7f619b6bb1059608fb';
+
+    const tokenApproveData = await get(api.storage.encodeTokenApprove, {
+      type: 'verify',
+      amount: Number(row.amount),
+    });
+
+    console.log(`tokenApproveData: ${tokenApproveData}`);
+    // return false
+    const approveTokenParameters = {
+      nonce: '0x00', // ignored by MetaMask
+      gasPrice: '0x4A817C800', // customizable by user during MetaMask confirmation.
+      gas: '0xF4240', // customizable by user during MetaMask confirmation.
+      to: tokenContractAddressHex, // Required except during contract publications.
+      from: selectedAddressHex, // must match user's active address.
+      value: '0x00', // Only required to send ether to the recipient from the initiating external account.
+      data: tokenApproveData, // Optional, but used for defining smart contract creation and interaction.
+      chainId: '210309', // Used to prevent transaction reuse across blockchains. Auto-filled by MetaMask.
+    };
+    console.log(approveTokenParameters);
+    // send approve transaction
+    // txHash is a hex string
+    // As with any RPC call, it may throw an error
+    const approveTxHash = await ethereum.request({
+      method: 'eth_sendTransaction',
+      params: [approveTokenParameters],
+    });
+    console.log(approveTxHash);
+
+    const stakeTokenData = await get(api.center.encodeStakeToken, {
+      enclave_public_key: row.enclave_public_key,
+      amount: Number(row.amount),
+    });
+    // '0xf89688a6e7356e85fe65cfb88230343734633465636461386435323861356164663238313062323763313734626531376338366532363361303939386633383061343266346132656233353066633534666233343131343661363330356261343336626339333334303266393836386430313333386163633761626438313835346332386231343738316237386131880de0b6b3a7640000';
+    console.log('stakeTokenData：', stakeTokenData);
+    const stakeTokenParameters = {
+      nonce: '0x00', // ignored by MetaMask
+      gasPrice: '0x4A817C800', // customizable by user during MetaMask confirmation.
+      gas: '0xF4240', // customizable by user during MetaMask confirmation.
+      to: verifyContractAddressHex, // Required except during contract publications.
+      from: selectedAddressHex, // must match user's active address.
+      value: '0x00', // Only required to send ether to the recipient from the initiating external account.
+      data: stakeTokenData, // Optional, but used for defining smart contract creation and interaction.
+      chainId: '210309', // Used to prevent transaction reuse across blockchains. Auto-filled by MetaMask.
+    };
+    console.log(stakeTokenParameters);
+
+    // send stake token transaction
+
+    setTimeout(async function () {
+      const stakeTxHash = await ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [stakeTokenParameters],
+      });
+      getStakeList();
+      console.log(stakeTxHash);
+    }, 2000);
+  };
+
   const stakeColumns: any[] = [
     {
       title: 'from',
-      dataIndex: 'from',
+      dataIndex: 'address',
       width: '30%',
       editable: true,
       align: 'center', // 设置文本居中的属性
-      render: (from: any) => ({ from }),
     },
     {
       title: '节点名称',
-      dataIndex: 'createdTime',
+      dataIndex: 'enclave_public_key',
       width: '20%',
       editable: true,
       align: 'center',
     },
     {
       title: '数量',
-      dataIndex: 'createdTime',
+      dataIndex: 'amount',
       width: '20%',
       editable: true,
       align: 'center',
     },
     {
       title: '区块号',
-      dataIndex: 'createdTime',
+      dataIndex: 'stake_block_num',
       width: '20%',
       editable: true,
       align: 'center',
     },
     {
       title: '操作',
-      dataIndex: 'createdTime',
+      dataIndex: 'key',
       width: '20%',
-      editable: true,
       align: 'center',
+      fixed: 'none',
+      render: (key: string, row: object) => (
+        <a onClick={() => ransom(row)}>赎回</a>
+      ),
     },
   ];
 
@@ -289,8 +443,13 @@ function canter(props: any) {
           <div className={styles.txt_title}>待领取收益</div>
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>PlatON</div>
-            <div className={styles.txt_item_val}>104.89 DAT</div>
-            <Button className="btn_ori" type="primary" shape="round">
+            <div className={styles.txt_item_val}>{detail.amount} DAT</div>
+            <Button
+              className="btn_ori"
+              type="primary"
+              onClick={Receive}
+              shape="round"
+            >
               领取
             </Button>
           </div>
@@ -311,8 +470,9 @@ function canter(props: any) {
             dataSource={stakeList}
             columns={mergedStakeColumns}
             rowClassName="editable-row"
-            rowKey={(columns) => columns.cid}
+            rowKey={(columns) => columns.enclave_public_key}
             pagination={false}
+            loading={stakeLoading}
           />
         </div>
 
@@ -336,6 +496,7 @@ function canter(props: any) {
             rowClassName="editable-row"
             rowKey={(columns) => columns.cid}
             pagination={false}
+            loading={fileLoading}
           />
         </div>
       </div>

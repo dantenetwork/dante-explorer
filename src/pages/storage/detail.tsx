@@ -253,9 +253,11 @@ const detail = (props: any) => {
         <Link to={`/storage/detail?key=${key}`} className="link">
           <Tooltip placement="bottom" title={key}>
             <span>
-              {key.slice(0, 15) +
-                '...' +
-                key.slice(key.toString().length - 15, key.toString().length)}
+              {key
+                ? key.slice(0, 15) +
+                  '...' +
+                  key.slice(key.toString().length - 15, key.toString().length)
+                : ''}
             </span>
           </Tooltip>
         </Link>
@@ -398,6 +400,7 @@ const detail = (props: any) => {
             columns={mergedColumns}
             rowClassName="editable-row"
             pagination={false}
+            rowKey={(columns) => columns.key}
           />
         </div>
       </div>

@@ -17,7 +17,7 @@ const DataItemValue: ItemValue[] = [];
 
 interface nodeItem {
   name: string;
-  id: Number;
+  id: string;
 }
 const nodeListData: nodeItem[] = [];
 const detail = (props: any) => {
@@ -220,6 +220,7 @@ const detail = (props: any) => {
             columns={mergedColumns}
             rowClassName="editable-row"
             pagination={false}
+            rowKey={(columns) => columns.id}
           />
         </div>
       </div>
