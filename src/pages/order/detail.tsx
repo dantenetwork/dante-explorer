@@ -6,6 +6,7 @@ import { Link, connect, history, ConnectProps, namespace_shop } from 'umi';
 import axios from 'axios';
 import { get, post } from '@/utils/server';
 import { api } from '@/config/apis';
+const { utils, BigNumber } = require('ethers');
 const ethereum = window.ethereum;
 
 interface ItemValue {
@@ -55,11 +56,51 @@ const detail = (props: any) => {
 
   const init = async () => {
     try {
-      const data: any = await get(api.order.dealDetail + '/' + publicKey);
-      console.log(data[11]);
-      setDetail(data);
-      const newArrray = Array.isArray(detail[11]?.value)
-        ? detail[11].value
+      const data: any = await get(api.order.deal + '/' + publicKey);
+      let dealInfo = [];
+      if (data) {
+        const ret = data;
+        const nameArray = [
+          '订单 ID',
+          '订单状态',
+          '节点是否被罚没',
+          '订单文件大小',
+          '订单价格',
+          '订单周期',
+          '订单结束区块号',
+          '订单发起人',
+          '需要存储节点的数量',
+          '订单总奖励',
+          '订单剩余奖励',
+          '节点列表',
+        ];
+
+        for (let i = 0; i < ret.length; i++) {
+          let value = ret[i];
+          if (i == 1) {
+            value = value;
+          } else if (i == 2) {
+            value = value;
+          } else if (i == 3) {
+            value = Number(value / 1024 / 1024 / 1024) + ' GB';
+          } else if (i == 4) {
+            value = utils.formatUnits(value || '0', 18) + ' DAT';
+          } else if (i == 5) {
+            value = value;
+          } else if (i == 9 || i == 10) {
+            value = utils.formatUnits(value || '0', 18) + ' DAT';
+          } else {
+            value = value;
+          }
+          dealInfo.push({
+            name: nameArray[i],
+            value: value,
+          });
+        }
+      }
+      setDetail(dealInfo);
+      const newArrray = Array.isArray(dealInfo[11]?.value)
+        ? dealInfo[11].value
         : [];
       setDataList(newArrray);
     } catch (error: any) {

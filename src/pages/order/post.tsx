@@ -231,7 +231,7 @@ function canter(props: any) {
           params: [stakeTokenParameters],
         });
         console.log(stakeTxHash);
-        const detail = await get(api.order.dealDetail + '/' + orderQuery.cid);
+        const detail = await get(api.order.deal + '/' + orderQuery.cid);
         if (orderQuery.cid) {
           await message.success('订单创建成功');
           if (Array.isArray(detail) && detail.length > 0) {

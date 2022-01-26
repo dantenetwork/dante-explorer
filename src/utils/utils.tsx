@@ -26,3 +26,18 @@ export function throttle(
     }
   };
 }
+
+export function toSize(val: any) {
+  val = Number(val);
+  if (val) {
+    if (val < 1024) {
+      return val + ' byte';
+    } else if (val >= 1024 && val < 1024 * 1024) {
+      return (val / 1024).toFixed(2) + ' KB';
+    } else if (val >= 1024 * 1024 && val < 1024 * 1024 * 1024) {
+      return ((val / 1024) * 1024).toFixed(2) + ' MB';
+    } else if (val >= 1024 * 1024 * 1024) {
+      return ((val / 1024) * 1024 * 1024).toFixed(2) + ' GB';
+    }
+  }
+}

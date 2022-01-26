@@ -6,16 +6,18 @@ import { Link, connect, history, ConnectProps } from 'umi';
 import { config } from '@/config';
 import axios from 'axios';
 import { get, post } from '@/utils/server';
+import { toSize } from '@/utils/utils';
 import { api } from '@/config/apis';
 const ethereum = window.ethereum;
 const { utils, BigNumber } = require('ethers');
 
 interface Item {
-  key: string;
-  id: string;
+  cid: string;
+  rewardBalance: string;
+  sender: string;
   size: string;
-  createdTime: string;
-  overTime: string;
+  state: Number;
+  totalReward: string;
 }
 
 const originData: Item[] = [];
@@ -37,7 +39,7 @@ function canter(props: any) {
   const [loading, setLoading] = useState(true);
 
   const [detail, setDetail] = useState({
-    key: '',
+    // key: '',
     totalCapacity: 0,
     taskVolume: '',
     latAddress: '',
@@ -88,7 +90,8 @@ function canter(props: any) {
 
     try {
       let data: any = await get(api.center.stakeList, {
-        enclave_public_key: ethereum.selectedAddress,
+        from: ethereum.selectedAddress,
+        skip: 0,
       });
       setStakeList(data.list);
       console.log(data);
@@ -154,16 +157,65 @@ function canter(props: any) {
 
   // }
 
-  const columns: any[] = [
+  const stakeColumns: any[] = [
     {
-      title: '订单ID',
-      dataIndex: 'id',
+      title: 'from',
+      dataIndex: 'from',
       width: '30%',
       editable: true,
       align: 'center', // 设置文本居中的属性
-      render: (id: any) => (
-        <Link to={`/node/detail?id=${id}`} className="link">
-          {id}
+      render: (from: any) => ({ from }),
+    },
+    {
+      title: '节点名称',
+      dataIndex: 'createdTime',
+      width: '20%',
+      editable: true,
+      align: 'center',
+    },
+    {
+      title: '数量',
+      dataIndex: 'createdTime',
+      width: '20%',
+      editable: true,
+      align: 'center',
+    },
+    {
+      title: '区块号',
+      dataIndex: 'createdTime',
+      width: '20%',
+      editable: true,
+      align: 'center',
+    },
+    {
+      title: '操作',
+      dataIndex: 'createdTime',
+      width: '20%',
+      editable: true,
+      align: 'center',
+    },
+  ];
+
+  const mergedStakeColumns = stakeColumns.map((col) => {
+    return {
+      ...col,
+      onCell: (record: Item) => ({
+        record,
+        title: col.title,
+      }),
+    };
+  });
+
+  const columns: any[] = [
+    {
+      title: '订单ID',
+      dataIndex: 'cid',
+      width: '30%',
+      editable: true,
+      align: 'center', // 设置文本居中的属性
+      render: (cid: any) => (
+        <Link to={`/order/detail/${cid}`} className="link">
+          {cid}
         </Link>
       ),
     },
@@ -173,6 +225,8 @@ function canter(props: any) {
       width: '20%',
       editable: true,
       align: 'center',
+      // (Number(size) / 1024) / 1024 / 1024
+      render: (size: any) => toSize(size),
     },
     {
       title: '创建时间',
@@ -195,7 +249,6 @@ function canter(props: any) {
       ...col,
       onCell: (record: Item) => ({
         record,
-        // dataIndex: col.dataIndex,
         title: col.title,
       }),
     };
@@ -249,7 +302,19 @@ function canter(props: any) {
             </Button>
           </div>
         </div>
+
         <Divider style={{ color: '#f70d0dd9' }} />
+        <div className="title">节点委托列表</div>
+        <div className="utable orderTable">
+          <Table
+            scroll={{ y: tbH }}
+            dataSource={stakeList}
+            columns={mergedStakeColumns}
+            rowClassName="editable-row"
+            rowKey={(columns) => columns.cid}
+            pagination={false}
+          />
+        </div>
 
         <Divider style={{ color: '#f70d0dd9' }} />
         <div className="title">
@@ -269,6 +334,7 @@ function canter(props: any) {
             dataSource={fileList}
             columns={mergedColumns}
             rowClassName="editable-row"
+            rowKey={(columns) => columns.cid}
             pagination={false}
           />
         </div>
