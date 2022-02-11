@@ -6,6 +6,7 @@ import { Link, connect, history, ConnectProps } from 'umi';
 
 import axios from 'axios';
 import { get, post } from '@/utils/server';
+import { formatDate } from '@/utils/utils';
 import { api } from '@/config/apis';
 import { config } from '@/config';
 const ethereum = window.ethereum;
@@ -54,10 +55,11 @@ function node(props: any) {
   useEffect(() => {
     // 需要在 componentDidMount 執行的内容
     getList();
-    ethereum.on('accountsChanged', function (accounts: any) {
-      //订阅 钱包地址更换地址
-      console.log('成功了 刷新吧1');
-    });
+    ethereum &&
+      ethereum.on('accountsChanged', function (accounts: any) {
+        //订阅 钱包地址更换地址
+        console.log('成功了 刷新吧1');
+      });
     return () => {
       // 需要在 componentWillUnmount 執行的内容
     };
@@ -65,17 +67,17 @@ function node(props: any) {
   useEffect(() => {
     //監聽屏幕
     getTbH();
-    ethereum.on('accountsChanged', function (accounts: any) {
-      //订阅 钱包地址更换地址
-      console.log('成功了 刷新吧2');
-    });
+    ethereum &&
+      ethereum.on('accountsChanged', function (accounts: any) {
+        //订阅 钱包地址更换地址
+        console.log('成功了 刷新吧2');
+      });
     return () => {};
   });
   const getTbH = async () => {
     const { navHeight, wHeight }: any = props;
     const ph: any = document.querySelector('.upagination')?.clientHeight || 0;
     const newTbH = wHeight - navHeight - ph - 240;
-    console.log(wHeight, navHeight, ph);
     if (tbH !== newTbH) {
       setTbH(newTbH);
     }
@@ -99,7 +101,6 @@ function node(props: any) {
       //   ...data.list
       // }))
       setLoading(false);
-      console.log('请求数据');
     } catch (error: any) {
       message.error(error);
       setLoading(false);
@@ -156,7 +157,6 @@ function node(props: any) {
     });
     // '0xe8883814b7fd4428590c9482e8570169703a6eacbb7e7f619b6bb1059608fb89056bc75e2d63100000';
     // '0xdf883814b7fd4428590c9482e8570169703a6eacbb7e7f619b6bb1059608fb02
-    console.log(tokenApproveData);
     // return false
     const approveTokenParameters = {
       nonce: '0x00', // ignored by MetaMask
@@ -168,7 +168,6 @@ function node(props: any) {
       data: tokenApproveData, // Optional, but used for defining smart contract creation and interaction.
       chainId: '210309', // Used to prevent transaction reuse across blockchains. Auto-filled by MetaMask.
     };
-    console.log(approveTokenParameters);
 
     // const data = await get(api.storage.convertHexadecimal, {
     //   contractAddress: detail?.senderAddress,
@@ -180,7 +179,7 @@ function node(props: any) {
       amount: Number(count),
     });
     // '0xf89688a6e7356e85fe65cfb88230343734633465636461386435323861356164663238313062323763313734626531376338366532363361303939386633383061343266346132656233353066633534666233343131343661363330356261343336626339333334303266393836386430313333386163633761626438313835346332386231343738316237386131880de0b6b3a7640000';
-    console.log('stakeTokenData：', stakeTokenData);
+
     const stakeTokenParameters = {
       nonce: '0x00', // ignored by MetaMask
       gasPrice: '0x4A817C800', // customizable by user during MetaMask confirmation.
@@ -191,7 +190,6 @@ function node(props: any) {
       data: stakeTokenData, // Optional, but used for defining smart contract creation and interaction.
       chainId: '210309', // Used to prevent transaction reuse across blockchains. Auto-filled by MetaMask.
     };
-    console.log(stakeTokenParameters);
 
     // send approve transaction
     // txHash is a hex string
@@ -200,7 +198,6 @@ function node(props: any) {
       method: 'eth_sendTransaction',
       params: [approveTokenParameters],
     });
-    console.log(approveTxHash);
 
     // send stake token transaction
 
@@ -209,7 +206,6 @@ function node(props: any) {
         method: 'eth_sendTransaction',
         params: [stakeTokenParameters],
       });
-      console.log(stakeTxHash);
     }, 2000);
   };
 
@@ -255,6 +251,9 @@ function node(props: any) {
       dataIndex: 'joinTime',
       width: '20%',
       align: 'center',
+      render: (val: string) => (
+        <span>{formatDate(val, 'yyyy-MM-dd hh:mm:ss') || '-'}</span>
+      ),
     },
     {
       title: '总质押',

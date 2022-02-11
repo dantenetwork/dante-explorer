@@ -5,6 +5,7 @@ import { Link, connect, history, ConnectProps, namespace_shop } from 'umi';
 
 import axios from 'axios';
 import { get, post } from '@/utils/server';
+import { formatDate } from '@/utils/utils';
 import { api } from '@/config/apis';
 const { utils, BigNumber } = require('ethers');
 const ethereum = window.ethereum;
@@ -18,6 +19,7 @@ const DataItemValue: ItemValue[] = [];
 interface nodeItem {
   name: string;
   id: string;
+  lat_address: string;
 }
 const nodeListData: nodeItem[] = [];
 const detail = (props: any) => {
@@ -48,7 +50,6 @@ const detail = (props: any) => {
     const { navHeight, wHeight }: any = props;
     const ph: any = document.querySelector('.upagination')?.clientHeight || 0;
     const newTbH = wHeight - navHeight - ph - 240;
-    console.log(wHeight, navHeight, ph);
     if (tbH !== newTbH) {
       setTbH(newTbH);
     }
@@ -56,6 +57,7 @@ const detail = (props: any) => {
 
   const init = async () => {
     try {
+      setLoading(true);
       const data: any = await get(api.order.deal + '/' + publicKey);
       let dealInfo = [];
       if (data) {
@@ -73,6 +75,7 @@ const detail = (props: any) => {
           '订单总奖励',
           '订单剩余奖励',
           '节点列表',
+          '订单结束时间',
         ];
 
         for (let i = 0; i < ret.length; i++) {
@@ -89,6 +92,8 @@ const detail = (props: any) => {
             value = value;
           } else if (i == 9 || i == 10) {
             value = utils.formatUnits(value || '0', 18) + ' DAT';
+          } else if (i == 12) {
+            value = value;
           } else {
             value = value;
           }
@@ -103,7 +108,9 @@ const detail = (props: any) => {
         ? dealInfo[11].value
         : [];
       setDataList(newArrray);
+      setLoading(false);
     } catch (error: any) {
+      setLoading(false);
       message.error(error);
     }
   };
@@ -111,10 +118,9 @@ const detail = (props: any) => {
   const columns: any[] = [
     {
       title: '节点ID(enclave key）',
-      dataIndex: 'id',
+      dataIndex: 'lat_address',
       width: '30%',
       align: 'center', // 设置文本居中的属性
-      render: (id: any) => ({ id }),
     },
     {
       title: '节点名称',
@@ -145,10 +151,12 @@ const detail = (props: any) => {
         <div className="space"></div>
 
         <div className={styles.txt_row}>
-          <div className={styles.txt_item}>
+          <div className={styles.txt_item} style={{ width: '100%' }}>
             <div className={styles.txt_item_title}>发起人：</div>
             <div className={styles.txt_item_val}>{detail[7]?.value}</div>
           </div>
+        </div>
+        <div className={styles.txt_row}>
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>状态：</div>
             <div className={styles.txt_item_val}>
@@ -163,36 +171,24 @@ const detail = (props: any) => {
             <div className={styles.txt_item_title}>大小：</div>
             <div className={styles.txt_item_val}>{detail[3]?.value}</div>
           </div>
-        </div>
-        <div className={styles.txt_row}>
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>价格：</div>
             <div className={styles.txt_item_val}>{detail[4]?.value} DAT</div>
           </div>
           <div className={styles.txt_item}>
-            <div className={styles.txt_item_title}>区块号：</div>
+            <div className={styles.txt_item_title}>到期区块：</div>
             <div className={styles.txt_item_val}>{detail[6]?.value}</div>
           </div>
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>区块数：</div>
             <div className={styles.txt_item_val}>{detail[5]?.value}</div>
           </div>
-        </div>
-        {/* <div className={styles.txt_row}>
-          <div className={styles.txt_item}>
-            <div className={styles.txt_item_title}>到期区块：</div>
-            <div className={styles.txt_item_val}>{detail[7]?.value}</div>
-          </div>
-          <div className={styles.txt_item}>
-            <div className={styles.txt_item_title}>预估时间：</div>
-            <div className={styles.txt_item_val}>{detail[7]?.value}</div>
-          </div>
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>订单结束时间：</div>
-            <div className={styles.txt_item_val}>{detail[7]?.value}</div>
+            <div className={styles.txt_item_val}>
+              {formatDate(detail[12]?.value, 'yyyy-MM-dd hh:mm:ss')}
+            </div>
           </div>
-        </div> */}
-        <div className={styles.txt_row}>
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>罚没：</div>
             <div className={styles.txt_item_val}>
@@ -220,7 +216,8 @@ const detail = (props: any) => {
             columns={mergedColumns}
             rowClassName="editable-row"
             pagination={false}
-            rowKey={(columns) => columns.id}
+            loading={loading}
+            rowKey={(columns) => columns.lat_address}
           />
         </div>
       </div>

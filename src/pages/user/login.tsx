@@ -15,8 +15,8 @@ interface state {
   selectedAddress: string;
 }
 
-// init DAT contract
 const ethereum = window.ethereum;
+// init DAT contract
 // const testNetwork = "http://35.247.155.162:6789";
 // var Web3 = require("web3");
 // let web3 = new Web3(new Web3.providers.HttpProvider(testNetwork));
@@ -47,21 +47,19 @@ class center extends Component<any, state> {
   }
   componentDidMount() {
     const _this = this;
-    ethereum.on('accountsChanged', function (accounts: any) {
-      //订阅 钱包地址更换地址
-      console.log('钱包地址更换地址');
-      _this.props.dispatch({
-        //赋值全局
-        type: 'common/update',
-        payload: { accountAddress: accounts[0] || '' },
+    if (ethereum !== undefined) {
+      ethereum.on('accountsChanged', function (accounts: any) {
+        //订阅 钱包地址更换地址
+        console.log('钱包地址更换地址');
+        _this.props.dispatch({
+          //赋值全局
+          type: 'common/update',
+          payload: { accountAddress: accounts[0] || '' },
+        });
+        history.goBack(); //return the same way
+        // Time to reload your interface with accounts[0]!
       });
-      history.goBack(); //return the same way
-      // Time to reload your interface with accounts[0]!
-    });
-    if (typeof ethereum !== 'undefined') {
-      console.log('MetaMask is installed!');
       setTimeout(() => {
-        console.log(this.props);
         if (this.props.accountAddress !== '' && this.props.accountAddress) {
           history.goBack(); //return the same way
         }
@@ -77,7 +75,6 @@ class center extends Component<any, state> {
       //   { vmType: 1 },
       // )
       // this.setState({DATContract:newContract})
-      // console.log(newContract)
       // connect to MetaMask wallet
     } else {
     }
@@ -106,13 +103,12 @@ class center extends Component<any, state> {
     );
   }
   async login() {
-    if (typeof window.ethereum !== 'undefined') {
+    if (typeof ethereum !== 'undefined') {
       this.setState({
         selectedAddress: window.ethereum.selectedAddress,
       });
       const { selectedAddress } = this.state;
       ethereum.request({ method: 'eth_requestAccounts' });
-      console.log('window.ethereum', ethereum[0], ethereum[1]);
       // connect to MetaMask wallet
       const _this = this;
       const accounts = await ethereum.request({

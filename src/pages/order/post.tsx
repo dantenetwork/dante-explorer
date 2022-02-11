@@ -61,7 +61,6 @@ const formItemLayoutItem = {
 };
 
 const normFile = (e: any) => {
-  console.log('Upload event:', e);
   if (Array.isArray(e)) {
     return e;
   }
@@ -69,7 +68,6 @@ const normFile = (e: any) => {
 };
 
 function canter(props: any) {
-  console.log(props);
   const [dataList, setDataList] = useState(originData);
   const [totalPrice, setTotalPrice] = useState(0);
 
@@ -118,7 +116,6 @@ function canter(props: any) {
     } catch (error: any) {
       message.error(error);
     }
-    console.log(originData);
     for (let i = 0; i < 50; i++) {
       originData.push({
         key: i.toString(),
@@ -134,7 +131,6 @@ function canter(props: any) {
   const goUploadFile = async (val: any) => {
     const client = create(props.config.IPFS);
     const result = await client.add(val.file);
-    console.log('cid: ', result);
     // const cid = result.name;
 
     const data = {
@@ -149,7 +145,6 @@ function canter(props: any) {
   };
 
   const onFinish = async (values: any) => {
-    console.log('Received values of form: ', values, orderQuery);
     setLoading(true);
     if (values.public_chain === '1') {
       message.success('订单创建成功', () => {
@@ -170,7 +165,6 @@ function canter(props: any) {
       });
       // '0xdf883814b7fd4428590c9482e8570169703a6eacbb7e7f619b6bb1059608fb02
 
-      console.log(`tokenApproveData: ${tokenApproveData}`);
       // return false
       const approveTokenParameters = {
         nonce: '0x00', // ignored by MetaMask
@@ -182,7 +176,6 @@ function canter(props: any) {
         data: tokenApproveData, // Optional, but used for defining smart contract creation and interaction.
         chainId: '210309', // Used to prevent transaction reuse across blockchains. Auto-filled by MetaMask.
       };
-      console.log(`approveTokenParameters:${approveTokenParameters}`);
 
       // send approve transaction
       // txHash is a hex string
@@ -195,7 +188,6 @@ function canter(props: any) {
         .catch((err: any) => {
           console.error(err);
         });
-      console.log(`approveTxHash：${approveTxHash}`);
 
       let stakeTokenData = await get(api.order.addDeal, {
         cid: orderQuery.cid,
@@ -210,7 +202,6 @@ function canter(props: any) {
       const marketContractAddressHex = props.config.marketContractAddressHex;
       // '0x82e8570169703a6eacbb7e7f619b6bb1059608fb';
 
-      console.log('stakeTokenData：', stakeTokenData);
       const stakeTokenParameters = {
         nonce: '0x00', // ignored by MetaMask
         gasPrice: '0x4A817C800', // customizable by user during MetaMask confirmation.
@@ -221,7 +212,6 @@ function canter(props: any) {
         data: stakeTokenData, // Optional, but used for defining smart contract creation and interaction.
         chainId: '210309', // Used to prevent transaction reuse across blockchains. Auto-filled by MetaMask.
       };
-      console.log(stakeTokenParameters);
 
       // send stake token transaction
 
@@ -230,14 +220,12 @@ function canter(props: any) {
           method: 'eth_sendTransaction',
           params: [stakeTokenParameters],
         });
-        console.log(stakeTxHash);
         const detail = await get(api.order.deal + '/' + orderQuery.cid);
         if (orderQuery.cid) {
           await message.success('订单创建成功');
           if (Array.isArray(detail) && detail.length > 0) {
             history.push('/order/detail/' + orderQuery.cid);
           }
-          console.log(detail);
         }
       }, 1500);
       await setLoading(false);
@@ -252,7 +240,6 @@ function canter(props: any) {
     changedFields: formData,
     allFields: formData,
   ) => {
-    console.log(changedFields, allFields);
     const total =
       allFields.duration * allFields.miner_required * allFields.deal_price;
     setTotalPrice(total || 0);

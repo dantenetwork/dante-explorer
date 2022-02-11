@@ -35,16 +35,6 @@ class common extends Component<any, any> {
       },
     });
 
-    if (ethereum !== 'undefined') {
-      await setTimeout(() => {
-        _this.setState({ address: ethereum.selectedAddress || '' });
-        _this.props.dispatch({
-          //赋值全局
-          type: 'common/update',
-          payload: { accountAddress: ethereum.selectedAddress || '' },
-        });
-      }, 500);
-    }
     this.setResize();
     window.addEventListener('resize', debounce(this.setResize.bind(this))); // listener window resize
 
@@ -61,10 +51,24 @@ class common extends Component<any, any> {
         }
       }
     });
-    ethereum.on('accountsChanged', function (accounts: any) {
-      //订阅 钱包地址更换地址
-      _this.setState({ address: accounts[0] || '' });
-    });
+    // if (ethereum !== undefined) {
+
+    // }
+    await setTimeout(() => {
+      _this.setState({ address: (ethereum && ethereum.selectedAddress) || '' });
+      _this.props.dispatch({
+        //赋值全局
+        type: 'common/update',
+        payload: {
+          accountAddress: (ethereum && ethereum.selectedAddress) || '',
+        },
+      });
+    }, 500);
+    ethereum &&
+      ethereum.on('accountsChanged', function (accounts: any) {
+        //订阅 钱包地址更换地址
+        _this.setState({ address: accounts[0] || '' });
+      });
   }
 
   setResize() {
@@ -159,6 +163,7 @@ class common extends Component<any, any> {
                 placeholder="请输入交易哈希/账户地址查询"
                 onChange={this.searchValueChange}
                 onPressEnter={this.searchSubmit}
+                allowClear
                 suffix={
                   <SearchOutlined
                     onClick={this.searchSubmit}
@@ -188,7 +193,7 @@ class common extends Component<any, any> {
                   </Link>
                 ) : (
                   <Link to="/login">
-                    <div className={styles.name}>账户？</div>
+                    <div className={styles.name}>登录？</div>
                   </Link>
                 )}
               </div>

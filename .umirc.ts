@@ -2,8 +2,13 @@ import { defineConfig } from 'umi';
 
 export default defineConfig({
   title: 'hi',
-  base: process.env.NODE_ENV === 'production' ? '/private/' : '/',
-  publicPath: process.env.NODE_ENV === 'production' ? './' : '/',
+
+  // base: process.env.NODE_ENV === 'production' ? '/private/' : '/',
+  // publicPath: process.env.NODE_ENV === 'production' ? '/private/' : '/',
+
+  base: process.env.NODE_ENV === 'production' ? '/' : '/',
+  publicPath: process.env.NODE_ENV === 'production' ? '/' : '/',
+
   locale: { antd: true },
   nodeModulesTransform: {
     type: 'none',
@@ -60,11 +65,12 @@ export default defineConfig({
   // mfsu: {}, //热更新
   // cssModulesTypescriptLoader: {},
   fastRefresh: {}, //快速刷新
-  // proxy: {//代理
-  //   '/api': {
-  //     'target': 'http://172.20.14.197:8081',
-  //     'changeOrigin': true,
-  //     'pathRewrite': { '^/api' : '' },
-  //   },
-  // },
+  proxy: {
+    //代理
+    '/api': {
+      target: 'http://172.20.14.197:8081',
+      changeOrigin: true,
+      pathRewrite: { '^/api': '/' },
+    },
+  },
 });

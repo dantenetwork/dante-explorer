@@ -15,6 +15,7 @@ import { Link, connect, history, ConnectProps, namespace_shop } from 'umi';
 
 import axios from 'axios';
 import { get, post } from '@/utils/server';
+import { formatDate } from '@/utils/utils';
 import { api } from '@/config/apis';
 import { config } from '@/config';
 const { utils, BigNumber } = require('ethers');
@@ -24,6 +25,7 @@ const ethereum = window.ethereum;
 
 interface Item {
   key: string;
+  cid: string;
   totalCapacity: Number;
   taskVolume: string;
   latAddress: string; //将enclave公钥转换为lat格式的地址
@@ -31,7 +33,7 @@ interface Item {
   senderAddress: string; //发送事务的矿工地址
   senderAddressHex: string;
   Delegator: Number;
-  joinTime: string;
+  time: string;
   totalPledge: string;
   entrustedIncome: Number;
   total_miner_reward: Number;
@@ -48,7 +50,7 @@ const detail = (props: any) => {
     totalCapacity: 0,
     taskVolume: '',
     Delegator: 0,
-    joinTime: '',
+    time: '',
     latAddress: '', //将enclave公钥转换为lat格式的地址
     rewardAddress: '', //接收奖励的矿工地址
     senderAddress: '', //发送事务的矿工地址
@@ -85,7 +87,7 @@ const detail = (props: any) => {
 
   const refreshBalance = async () => {
     const balance = await get(api.balance, {
-      selectedAddress: ethereum.selectedAddress,
+      selectedAddress: ethereum && ethereum.selectedAddress,
     });
     // const balance = await ethereum.request({
     //   method: 'eth_getBalance',
@@ -99,7 +101,6 @@ const detail = (props: any) => {
     const { navHeight, wHeight }: any = props;
     const ph: any = document.querySelector('.upagination')?.clientHeight || 0;
     const newTbH = wHeight - navHeight - ph - 240;
-    console.log(wHeight, navHeight, ph);
     if (tbH !== newTbH) {
       setTbH(newTbH);
     }
@@ -109,6 +110,7 @@ const detail = (props: any) => {
     const originData: Item[] = [];
     try {
       if (!hasNext) return false;
+      setLoading(true);
       let data: any = await get(api.storage.minerlist, {
         enclave_public_key: publicKey,
       });
@@ -123,6 +125,7 @@ const detail = (props: any) => {
       // setDataList((oldData)=>({
       //   ...data.list
       // }))
+      setLoading(false);
     } catch (error: any) {
       message.error(error);
     }
@@ -131,12 +134,10 @@ const detail = (props: any) => {
 
   const init = async () => {
     try {
-      console.log(publicKey);
       let data: any = await get(api.storage.detail, {
         enclave_public_key: publicKey,
       });
       setDetail(data);
-      console.log(data);
     } catch (error: any) {
       message.error(error);
     }
@@ -169,7 +170,6 @@ const detail = (props: any) => {
 
   const entrusting = async (count: Number) => {
     // const newConfig: any = await get('/config');
-    // console.log('666666666', newConfig);
     const selectedAddressHex = props.accountAddress;
     // const contractAddressHex = detail?.senderAddressHex;
 
@@ -186,7 +186,6 @@ const detail = (props: any) => {
     // '0xe8883814b7fd4428590c9482e8570169703a6eacbb7e7f619b6bb1059608fb89056bc75e2d63100000';
     // '0xdf883814b7fd4428590c9482e8570169703a6eacbb7e7f619b6bb1059608fb02
 
-    console.log(`tokenApproveData: ${tokenApproveData}`);
     // return false
     const approveTokenParameters = {
       nonce: '0x00', // ignored by MetaMask
@@ -198,7 +197,6 @@ const detail = (props: any) => {
       data: tokenApproveData, // Optional, but used for defining smart contract creation and interaction.
       chainId: '210309', // Used to prevent transaction reuse across blockchains. Auto-filled by MetaMask.
     };
-    console.log(approveTokenParameters);
 
     // const data = await get(api.storage.convertHexadecimal, {
     //   contractAddress: detail?.senderAddress,
@@ -210,7 +208,7 @@ const detail = (props: any) => {
       amount: Number(count),
     });
     // '0xf89688a6e7356e85fe65cfb88230343734633465636461386435323861356164663238313062323763313734626531376338366532363361303939386633383061343266346132656233353066633534666233343131343661363330356261343336626339333334303266393836386430313333386163633761626438313835346332386231343738316237386131880de0b6b3a7640000';
-    console.log('stakeTokenData：', stakeTokenData);
+
     const stakeTokenParameters = {
       nonce: '0x00', // ignored by MetaMask
       gasPrice: '0x4A817C800', // customizable by user during MetaMask confirmation.
@@ -221,7 +219,6 @@ const detail = (props: any) => {
       data: stakeTokenData, // Optional, but used for defining smart contract creation and interaction.
       chainId: '210309', // Used to prevent transaction reuse across blockchains. Auto-filled by MetaMask.
     };
-    console.log(stakeTokenParameters);
 
     // send approve transaction
     // txHash is a hex string
@@ -230,7 +227,6 @@ const detail = (props: any) => {
       method: 'eth_sendTransaction',
       params: [approveTokenParameters],
     });
-    console.log(approveTxHash);
 
     // send stake token transaction
 
@@ -239,49 +235,52 @@ const detail = (props: any) => {
         method: 'eth_sendTransaction',
         params: [stakeTokenParameters],
       });
-      console.log(stakeTxHash);
     }, 2000);
   };
 
   const columns: any[] = [
     {
       title: '订单ID',
-      dataIndex: 'key',
+      dataIndex: 'cid',
       width: '30%',
       align: 'center', // 设置文本居中的属性
-      render: (key: any) => (
-        <Link to={`/storage/detail?key=${key}`} className="link">
-          <Tooltip placement="bottom" title={key}>
-            <span>
-              {key
-                ? key.slice(0, 15) +
-                  '...' +
-                  key.slice(key.toString().length - 15, key.toString().length)
-                : ''}
-            </span>
-          </Tooltip>
+      render: (cid: any) => (
+        <Link to={`/order/detail/${cid}`} className="link">
+          {cid}
         </Link>
       ),
     },
     {
       title: '订单状态',
-      dataIndex: 'totalCapacity',
+      dataIndex: 'state',
       width: '20%',
       align: 'center',
+      render: (state: number) => (
+        <span>
+          {
+            //'等待接单', '已接满', '已到期', '非法订单'
+            ['等待接单', '已接满', '已到期', '非法订单'][Number(state)]
+          }
+        </span>
+      ),
     },
     {
       title: '创建时间',
-      dataIndex: 'joinTime',
+      dataIndex: 'startTime',
       width: '20%',
       align: 'center',
-      render: (val: string) => <span>{val || '-'}</span>,
+      render: (val: string) => (
+        <span>{formatDate(val, 'yyyy-MM-dd hh:mm:ss') || '-'}</span>
+      ),
     },
     {
       title: '有效期至',
-      dataIndex: 'totalPledge',
+      dataIndex: 'endTime',
       width: '20%',
       align: 'center',
-      render: (val: string) => <span>{val || '-'}</span>,
+      render: (val: string) => (
+        <span>{formatDate(val, 'yyyy-MM-dd hh:mm:ss') || '-'}</span>
+      ),
     },
   ];
   const onFinish = (values: any) => {
@@ -297,7 +296,7 @@ const detail = (props: any) => {
       ...col,
       onCell: (record: Item) => ({
         record,
-        // dataIndex: col.dataIndex,
+        cid: col.cid,
         title: col.title,
       }),
     };
@@ -399,12 +398,13 @@ const detail = (props: any) => {
             dataSource={dataList}
             columns={mergedColumns}
             rowClassName="editable-row"
+            loading={loading}
             pagination={false}
-            rowKey={(columns) => columns.key}
+            rowKey={(columns) => columns.cid}
           />
         </div>
       </div>
-      <div className="max-body upagination">
+      {/* <div className="max-body upagination">
         <Pagination
           total={total}
           pageSize={10}
@@ -413,7 +413,7 @@ const detail = (props: any) => {
           showQuickJumper
           showTotal={(total) => `共 ${total} 页`}
         />
-      </div>
+      </div> */}
       <Modal
         title={`余额：${DATBalance}`}
         visible={tradeModel}

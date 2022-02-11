@@ -41,3 +41,33 @@ export function toSize(val: any) {
     }
   }
 }
+
+/**
+ * 格式化时间
+ *
+ * @param time
+ *            长整型时间
+ * @param fmt
+ *            时间格式，默认：yyyy-MM-dd
+ * @returns
+ */
+export function formatDate(receiveTime: any, fmt: string) {
+  if (receiveTime == null) {
+    return;
+  }
+  var fmt = fmt ? fmt : 'yyyy-MM-dd';
+  var time = new Date(parseInt(receiveTime));
+  var z = {
+    M: time.getMonth() + 1,
+    d: time.getDate(),
+    h: time.getHours(),
+    m: time.getMinutes(),
+    s: time.getSeconds(),
+  };
+  fmt = fmt.replace(/(M+|d+|h+|m+|s+)/g, function (v) {
+    return ((v.length > 1 ? '0' : '') + eval('z.' + v.slice(-1))).slice(-2);
+  });
+  return fmt.replace(/(y+)/g, function (v) {
+    return time.getFullYear().toString().slice(-v.length);
+  });
+}

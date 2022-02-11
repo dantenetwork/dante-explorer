@@ -9,15 +9,17 @@
     color: #2fccef;
     .title_val {
       font-size: 16px;
-      margin-left: 25px;
+      margin-left: 20px;
     }
   }
   .txt_row {
+    flex-wrap: wrap;
+    // &:first-child
     &:first-child {
       margin-top: 40px;
     }
     display: flex;
-    margin-top: 20px;
+    // margin-top: 20px;
     .txt_title {
       font-size: 17px;
       font-family: Microsoft YaHei UI;
@@ -25,8 +27,9 @@
       width: 130px;
     }
     .txt_item {
-      flex: 1;
       display: flex;
+      width: 31.33%;
+      margin: 5px 1%;
       align-items: center;
     }
 
@@ -36,10 +39,10 @@
       color: #12164a;
     }
     .txt_item_val {
-      font-size: 12px;
+      font-size: 14px;
       font-family: Microsoft YaHei UI;
       font-weight: 400;
-      margin-left: 25px;
+      margin-left: 15px;
       color: #6b7889;
     }
     .me {
