@@ -223,9 +223,11 @@ function canter(props: any) {
         const detail = await get(api.order.deal + '/' + orderQuery.cid);
         if (orderQuery.cid) {
           await message.success('订单创建成功');
-          if (Array.isArray(detail) && detail.length > 0) {
-            history.push('/order/detail/' + orderQuery.cid);
-          }
+          setTimeout(() => {
+            if (Array.isArray(detail) && detail.length > 0) {
+              history.push('/order/detail/' + orderQuery.cid);
+            }
+          }, 1500);
         }
       }, 1500);
       await setLoading(false);

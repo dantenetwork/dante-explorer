@@ -78,6 +78,11 @@
 .utable .ant-table-thead > tr > th:not(:last-child):not(.ant-table-selection-column):not(.ant-table-row-expand-icon-cell):not([colspan])::before{
   width: 0;
 }
+.utable .ant-table-cell-fix-left,.utable  .ant-table-cell-fix-right{
+  background: transparent;
+}
+
+
 .upagination{
     text-align: right;
     padding: 0px 0 30px;
@@ -131,3 +136,4 @@
 .upagination .ant-pagination-item-active a {
   color: #FFFFFF;
 }
+

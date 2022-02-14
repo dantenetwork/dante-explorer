@@ -75,6 +75,7 @@ function node(props: any) {
       if (!hasNext) return false;
       setLoading(true);
       let data: any = await get(api.order.deal, { skip: page });
+      data.list.reverse();
       setDataList(data.list);
       setTotal(data.total);
       if (data.total - page * 10 > 10) {

@@ -169,24 +169,26 @@ const detail = (props: any) => {
           </div>
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>大小：</div>
-            <div className={styles.txt_item_val}>{detail[3]?.value}</div>
+            <div className={styles.txt_item_val}>{detail[3]?.value || '-'}</div>
           </div>
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>价格：</div>
-            <div className={styles.txt_item_val}>{detail[4]?.value} DAT</div>
+            <div className={styles.txt_item_val}>
+              {detail[4]?.value || '0'} DAT
+            </div>
           </div>
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>到期区块：</div>
-            <div className={styles.txt_item_val}>{detail[6]?.value}</div>
+            <div className={styles.txt_item_val}>{detail[6]?.value || '-'}</div>
           </div>
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>区块数：</div>
-            <div className={styles.txt_item_val}>{detail[5]?.value}</div>
+            <div className={styles.txt_item_val}>{detail[5]?.value || '-'}</div>
           </div>
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>订单结束时间：</div>
             <div className={styles.txt_item_val}>
-              {formatDate(detail[12]?.value, 'yyyy-MM-dd hh:mm:ss')}
+              {formatDate(detail[12]?.value, 'yyyy-MM-dd hh:mm:ss') || '-'}
             </div>
           </div>
           <div className={styles.txt_item}>
@@ -197,11 +199,13 @@ const detail = (props: any) => {
           </div>
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>奖励总额：</div>
-            <div className={styles.txt_item_val}>{detail[9]?.value}</div>
+            <div className={styles.txt_item_val}>{detail[9]?.value || '0'}</div>
           </div>
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>奖励余额：</div>
-            <div className={styles.txt_item_val}>{detail[10]?.value}</div>
+            <div className={styles.txt_item_val}>
+              {detail[10]?.value || '0'}
+            </div>
           </div>
         </div>
 
