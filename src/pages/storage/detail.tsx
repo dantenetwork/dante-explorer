@@ -15,7 +15,7 @@ import { Link, connect, history, ConnectProps, namespace_shop } from 'umi';
 
 import axios from 'axios';
 import { get, post } from '@/utils/server';
-import { formatDate } from '@/utils/utils';
+import { formatDate, format } from '@/utils/utils';
 import { api } from '@/config/apis';
 import { config } from '@/config';
 const { utils, BigNumber } = require('ethers');
@@ -333,7 +333,9 @@ const detail = (props: any) => {
         <div className={styles.txt_row}>
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>总容量：</div>
-            <div className={styles.txt_item_val}>{detail.totalCapacity} GB</div>
+            <div className={styles.txt_item_val}>
+              {format(detail.totalCapacity)} GB
+            </div>
           </div>
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>委托者数量:</div>
@@ -341,7 +343,9 @@ const detail = (props: any) => {
           </div>
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>总质押：</div>
-            <div className={styles.txt_item_val}>{detail.totalPledge} DAT</div>
+            <div className={styles.txt_item_val}>
+              {format(detail.totalPledge)} DAT
+            </div>
           </div>
         </div>
         <div className={styles.txt_row}>
@@ -353,7 +357,9 @@ const detail = (props: any) => {
           </div>
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>任务量：</div>
-            <div className={styles.txt_item_val}>{detail.taskVolume}</div>
+            <div className={styles.txt_item_val}>
+              {format(detail.taskVolume)}
+            </div>
           </div>
           <div className={styles.txt_item}></div>
         </div>
@@ -364,7 +370,7 @@ const detail = (props: any) => {
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>节点奖励：</div>
             <div className={styles.txt_item_val}>
-              {detail.total_miner_reward || '0'} DAT
+              {format(detail.total_miner_reward) || '0'} DAT
             </div>
           </div>
           <div className={styles.txt_item}>
@@ -380,7 +386,7 @@ const detail = (props: any) => {
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>委托奖励：</div>
             <div className={styles.txt_item_val}>
-              {detail.total_staker_reward || '0'} DAT
+              {format(detail.total_staker_reward) || '0'} DAT
             </div>
           </div>
           <div className={styles.txt_item}>
@@ -415,7 +421,7 @@ const detail = (props: any) => {
         />
       </div> */}
       <Modal
-        title={`余额：${DATBalance}`}
+        title={`余额：${format(DATBalance)}`}
         visible={tradeModel}
         onOk={comfirmTrade}
         onCancel={hideModal}

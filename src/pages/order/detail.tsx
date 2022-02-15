@@ -5,7 +5,7 @@ import { Link, connect, history, ConnectProps, namespace_shop } from 'umi';
 
 import axios from 'axios';
 import { get, post } from '@/utils/server';
-import { formatDate } from '@/utils/utils';
+import { formatDate, format, toSize } from '@/utils/utils';
 import { api } from '@/config/apis';
 const { utils, BigNumber } = require('ethers');
 const ethereum = window.ethereum;
@@ -85,13 +85,13 @@ const detail = (props: any) => {
           } else if (i == 2) {
             value = value;
           } else if (i == 3) {
-            value = Number(value / 1024 / 1024 / 1024) + ' GB';
+            value = toSize(value);
           } else if (i == 4) {
-            value = utils.formatUnits(value || '0', 18) + ' DAT';
+            value = format(utils.formatUnits(value || '0', 18)) + ' DAT';
           } else if (i == 5) {
             value = value;
           } else if (i == 9 || i == 10) {
-            value = utils.formatUnits(value || '0', 18) + ' DAT';
+            value = format(utils.formatUnits(value || '0', 18)) + ' DAT';
           } else if (i == 12) {
             value = value;
           } else {
@@ -173,17 +173,19 @@ const detail = (props: any) => {
           </div>
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>价格：</div>
-            <div className={styles.txt_item_val}>
-              {detail[4]?.value || '0'} DAT
-            </div>
+            <div className={styles.txt_item_val}>{detail[4]?.value || '0'}</div>
           </div>
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>到期区块：</div>
-            <div className={styles.txt_item_val}>{detail[6]?.value || '-'}</div>
+            <div className={styles.txt_item_val}>
+              {format(detail[6]?.value || 0)}
+            </div>
           </div>
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>区块数：</div>
-            <div className={styles.txt_item_val}>{detail[5]?.value || '-'}</div>
+            <div className={styles.txt_item_val}>
+              {format(detail[5]?.value || 0)}
+            </div>
           </div>
           <div className={styles.txt_item}>
             <div className={styles.txt_item_title}>订单结束时间：</div>

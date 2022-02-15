@@ -31,13 +31,13 @@ export function toSize(val: any) {
   val = Number(val);
   if (val) {
     if (val < 1024) {
-      return val + ' byte';
+      return format(val) + ' byte';
     } else if (val >= 1024 && val < 1024 * 1024) {
-      return (val / 1024).toFixed(2) + ' KB';
+      return format((val / 1024).toFixed(2)) + ' KB';
     } else if (val >= 1024 * 1024 && val < 1024 * 1024 * 1024) {
-      return ((val / 1024) * 1024).toFixed(2) + ' MB';
+      return format((val / 1024 / 1024).toFixed(2)) + ' MB';
     } else if (val >= 1024 * 1024 * 1024) {
-      return ((val / 1024) * 1024 * 1024).toFixed(2) + ' GB';
+      return format((val / (1024 * 1024 * 1024)).toFixed(2)) + ' GB';
     }
   }
 }
@@ -70,4 +70,27 @@ export function formatDate(receiveTime: any, fmt: string) {
   return fmt.replace(/(y+)/g, function (v) {
     return time.getFullYear().toString().slice(-v.length);
   });
+}
+
+/**
+ * 千分位
+ *
+ * @param num
+ * @returns
+ */
+export function format(num: any) {
+  num = num;
+  return (num + '').replace(/(\d{1,3})(?=(\d{3})+(?:$|\.))/g, '$1,');
+}
+
+export function arrayAort(val: any, parameter: string) {
+  let key = val.map((e: any) => e[parameter]);
+
+  key.sort((key1: number, key2: number) => key2 - key1);
+
+  let newVal = [];
+  for (let v in key) {
+    newVal.push(...val.filter((e: any) => e[parameter] === key[v]));
+  }
+  return newVal;
 }

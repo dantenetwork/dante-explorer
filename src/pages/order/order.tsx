@@ -3,10 +3,10 @@ import styles from './order.less';
 // import './node.css'
 import { Table, Modal, Form, Input, message, Pagination, Tooltip } from 'antd';
 import { Link, connect, history, ConnectProps } from 'umi';
-import { toSize } from '@/utils/utils';
+import { toSize, arrayAort } from '@/utils/utils';
 import axios from 'axios';
 import { get, post } from '@/utils/server';
-import { formatDate } from '@/utils/utils';
+import { formatDate, format } from '@/utils/utils';
 import { api } from '@/config/apis';
 import { config } from '@/config';
 const ethereum = window.ethereum;
@@ -75,8 +75,10 @@ function node(props: any) {
       if (!hasNext) return false;
       setLoading(true);
       let data: any = await get(api.order.deal, { skip: page });
-      data.list.reverse();
-      setDataList(data.list);
+
+      let newList = arrayAort(data.list, 'startTime');
+
+      setDataList(newList);
       setTotal(data.total);
       if (data.total - page * 10 > 10) {
         setPage(page + 1);
@@ -85,7 +87,7 @@ function node(props: any) {
         setHasNext(false);
       }
       // setDataList((oldData)=>({
-      //   ...data.list
+      //   ...newList
       // }))
       setLoading(false);
     } catch (error: any) {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { connect } from 'umi';
 import styles from './home.less';
 import './home.css';
+import { format, toSize } from '@/utils/utils';
 import { Carousel, message } from 'antd';
 import { get, post } from '@/utils/server';
 import { api } from '@/config/apis';
@@ -91,17 +92,19 @@ function Home(props: any) {
           <div className={styles.status}>
             <div className={styles.fstatus_title}>全网容量</div>
             <div className={styles.fstatus_txt}>
-              {statusData.cur_period_total_capacity}GB
+              {toSize(statusData.cur_period_total_capacity)}
             </div>
           </div>
           <div className={styles.status}>
             <div className={styles.fstatus_title}>存储节点数量</div>
-            <div className={styles.fstatus_txt}>{statusData.nodes_number}</div>
+            <div className={styles.fstatus_txt}>
+              {format(statusData.nodes_number)}
+            </div>
           </div>
           <div className={styles.status}>
             <div className={styles.fstatus_title}>全网委托者数量</div>
             <div className={styles.fstatus_txt}>
-              {statusData.total_staker_count}
+              {format(statusData.total_staker_count)}
             </div>
           </div>
           <div className={styles.status}>

@@ -1,7 +1,7 @@
 import { defineConfig } from 'umi';
 
 export default defineConfig({
-  title: 'hi',
+  title: 'Dante Network',
 
   // base: process.env.NODE_ENV === 'production' ? '/private/' : '/',
   // publicPath: process.env.NODE_ENV === 'production' ? '/private/' : '/',

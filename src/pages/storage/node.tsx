@@ -6,7 +6,7 @@ import { Link, connect, history, ConnectProps } from 'umi';
 
 import axios from 'axios';
 import { get, post } from '@/utils/server';
-import { formatDate } from '@/utils/utils';
+import { formatDate, format, toSize } from '@/utils/utils';
 import { api } from '@/config/apis';
 import { config } from '@/config';
 const ethereum = window.ethereum;
@@ -232,13 +232,14 @@ function node(props: any) {
       dataIndex: 'totalCapacity',
       width: '20%',
       align: 'center',
-      render: (val: any) => <span>{val || 0} GB</span>,
+      render: (val: any) => <span>{toSize(val) || 0}</span>,
     },
     {
       title: '任务量',
       dataIndex: 'taskVolume',
       width: '20%',
       align: 'center',
+      render: (val: any) => <span>{format(Number(val)) || 0}</span>,
     },
     {
       title: '委托者',
@@ -260,7 +261,7 @@ function node(props: any) {
       dataIndex: 'totalPledge',
       width: '20%',
       align: 'center',
-      render: (val: any) => <span>{val || 0} DAT</span>,
+      render: (val: any) => <span>{format(val) || 0} DAT</span>,
     },
     {
       title: '委托收益比例',
@@ -316,7 +317,7 @@ function node(props: any) {
         />
       </div>
       <Modal
-        title={`余额：${DATBalance}`}
+        title={`余额：${format(DATBalance)}`}
         visible={tradeModel}
         onOk={comfirmTrade}
         onCancel={hideModal}

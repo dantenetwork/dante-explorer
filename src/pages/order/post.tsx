@@ -22,6 +22,7 @@ import { history, connect, ConnectProps } from 'umi';
 import axios from 'axios';
 import { get, post } from '@/utils/server';
 import { api } from '@/config/apis';
+import { format } from '@/utils/utils';
 import { UploadOutlined, InboxOutlined } from '@ant-design/icons';
 
 import { create } from 'ipfs-http-client';
@@ -156,6 +157,7 @@ function canter(props: any) {
       const tokenContractAddressHex = props.config.tokenContractAddressHex;
       // '0xaab2110f01c41b9fb05b6472fa6c5c1c8f259abb';
       const totalPrices =
+        1000000000000000000 *
         Number(values.deal_price) *
         Number(values.miner_required) *
         Number(values.duration);
@@ -164,7 +166,6 @@ function canter(props: any) {
         amount: totalPrices,
       });
       // '0xdf883814b7fd4428590c9482e8570169703a6eacbb7e7f619b6bb1059608fb02
-
       // return false
       const approveTokenParameters = {
         nonce: '0x00', // ignored by MetaMask
@@ -188,17 +189,15 @@ function canter(props: any) {
         .catch((err: any) => {
           console.error(err);
         });
-
       let stakeTokenData = await get(api.order.addDeal, {
         cid: orderQuery.cid,
         size: Number(orderQuery.size),
-        deal_price: Number(values.deal_price),
+        deal_price: Number(values.deal_price) * 1000000000000000000,
         duration: Number(values.duration),
         miner_required: Number(values.miner_required),
       }).catch((err: any) => {
         console.error(err);
       });
-
       const marketContractAddressHex = props.config.marketContractAddressHex;
       // '0x82e8570169703a6eacbb7e7f619b6bb1059608fb';
 
@@ -227,7 +226,7 @@ function canter(props: any) {
             if (Array.isArray(detail) && detail.length > 0) {
               history.push('/order/detail/' + orderQuery.cid);
             }
-          }, 1500);
+          }, 2500);
         }
       }, 1500);
       await setLoading(false);
@@ -447,7 +446,7 @@ function canter(props: any) {
             <span className="ant-form-text"> DAT</span>
           </Form.Item>
           <Form.Item label="总价" className="items required">
-            <span className="ant-form-text">{totalPrice} DAT</span>
+            <span className="ant-form-text">{format(totalPrice)} DAT</span>
           </Form.Item>
           <Form.Item wrapperCol={{ span: 15, offset: 5 }} className="btn">
             <Button
