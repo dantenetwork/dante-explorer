@@ -23,6 +23,7 @@ import axios from 'axios';
 import { get, post } from '@/utils/server';
 import { api } from '@/config/apis';
 import { format } from '@/utils/utils';
+const { utils, BigNumber } = require('ethers');
 import { UploadOutlined, InboxOutlined } from '@ant-design/icons';
 
 import { create } from 'ipfs-http-client';
@@ -85,7 +86,6 @@ function canter(props: any) {
 
   useEffect(() => {
     // 需要在 componentDidMount 執行的内容
-
     getList();
     return () => {
       // 需要在 componentWillUnmount 執行的内容
@@ -105,6 +105,8 @@ function canter(props: any) {
   });
 
   const getList = async () => {
+    // const detail = await get(api.order.verifyDeal + '/' + '');
+    // console.log('datail:',detail)
     const originData: Item[] = [];
     try {
       // let data:any = await get(api.storage.list)
@@ -156,11 +158,11 @@ function canter(props: any) {
 
       const tokenContractAddressHex = props.config.tokenContractAddressHex;
       // '0xaab2110f01c41b9fb05b6472fa6c5c1c8f259abb';
-      const totalPrices =
-        1000000000000000000 *
+      let totalPrices =
         Number(values.deal_price) *
         Number(values.miner_required) *
         Number(values.duration);
+      // totalPrices=utils.formatUnits(String(totalPrices*1000000000000000000), 0)
       const tokenApproveData = await get(api.storage.encodeTokenApprove, {
         type: 'market',
         amount: totalPrices,
@@ -192,7 +194,8 @@ function canter(props: any) {
       let stakeTokenData = await get(api.order.addDeal, {
         cid: orderQuery.cid,
         size: Number(orderQuery.size),
-        deal_price: Number(values.deal_price) * 1000000000000000000,
+        // deal_price: utils.formatUnits(String(Number(values.deal_price)*1000000000000000000), 0) ,
+        deal_price: Number(values.deal_price),
         duration: Number(values.duration),
         miner_required: Number(values.miner_required),
       }).catch((err: any) => {
@@ -213,7 +216,7 @@ function canter(props: any) {
       };
 
       // send stake token transaction
-
+      console.log(stakeTokenParameters);
       setTimeout(async function () {
         const stakeTxHash = await ethereum.request({
           method: 'eth_sendTransaction',

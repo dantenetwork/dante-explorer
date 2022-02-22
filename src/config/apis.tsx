@@ -17,6 +17,7 @@ export const api = {
   order: {
     addDeal: '/add_deal',
     deal: '/deal',
+    verifyDeal: '/verifyDeal',
   },
   center: {
     stakeList: '/center/stake_list',
